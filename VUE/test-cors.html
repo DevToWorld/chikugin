@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CORS Test</title>
+</head>
+<body>
+    <h1>CORS Test</h1>
+    <div id="results"></div>
+    
+    <script>
+        async function testCORS() {
+            const resultsDiv = document.getElementById('results');
+            const baseURL = 'http://localhost:8000';
+            
+            resultsDiv.innerHTML = '<p>Testing CORS configuration...</p>';
+            
+            try {
+                // Test 1: Simple GET request
+                console.log('Testing GET request to:', baseURL + '/api/test');
+                const response = await fetch(baseURL + '/api/test', {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    },
+                    mode: 'cors',
+                    credentials: 'include'
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    resultsDiv.innerHTML += `<p style="color: green;">✅ GET request successful: ${JSON.stringify(data)}</p>`;
+                } else {
+                    resultsDiv.innerHTML += `<p style="color: red;">❌ GET request failed: ${response.status} ${response.statusText}</p>`;
+                }
+            } catch (error) {
+                resultsDiv.innerHTML += `<p style="color: red;">❌ GET request error: ${error.message}</p>`;
+            }
+            
+            try {
+                // Test 2: OPTIONS preflight request
+                console.log('Testing OPTIONS preflight request to:', baseURL + '/api/test');
+                const response = await fetch(baseURL + '/api/test', {
+                    method: 'OPTIONS',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer test-token'
+                    },
+                    mode: 'cors',
+                    credentials: 'include'
+                });
+                
+                if (response.ok) {
+                    resultsDiv.innerHTML += `<p style="color: green;">✅ OPTIONS preflight successful: ${response.status}</p>`;
+                    resultsDiv.innerHTML += `<p>CORS Headers:</p><ul>`;
+                    for (const [key, value] of response.headers.entries()) {
+                        if (key.toLowerCase().startsWith('access-control-')) {
+                            resultsDiv.innerHTML += `<li><strong>${key}:</strong> ${value}</li>`;
+                        }
+                    }
+                    resultsDiv.innerHTML += `</ul>`;
+                } else {
+                    resultsDiv.innerHTML += `<p style="color: red;">❌ OPTIONS preflight failed: ${response.status} ${response.statusText}</p>`;
+                }
+            } catch (error) {
+                resultsDiv.innerHTML += `<p style="color: red;">❌ OPTIONS preflight error: ${error.message}</p>`;
+            }
+            
+            try {
+                // Test 3: POST request with credentials
+                console.log('Testing POST request to:', baseURL + '/api/test');
+                const response = await fetch(baseURL + '/api/test', {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer test-token'
+                    },
+                    body: JSON.stringify({ test: 'data' }),
+                    mode: 'cors',
+                    credentials: 'include'
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    resultsDiv.innerHTML += `<p style="color: green;">✅ POST request successful: ${JSON.stringify(data)}</p>`;
+                } else {
+                    resultsDiv.innerHTML += `<p style="color: red;">❌ POST request failed: ${response.status} ${response.statusText}</p>`;
+                }
+            } catch (error) {
+                resultsDiv.innerHTML += `<p style="color: red;">❌ POST request error: ${error.message}</p>`;
+            }
+        }
+        
+        // Run test when page loads
+        window.addEventListener('load', testCORS);
+    </script>
+</body>
+</html>
+
