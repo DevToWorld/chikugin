@@ -184,6 +184,33 @@ Route::prefix('admin')->group(function () {
         ]);
     });
     
+    // デバッグ用: 認証・認可状態確認エンドポイント
+    Route::get('/debug-auth', function() {
+        $user = auth('sanctum')->user();
+        $isAdmin = false;
+        $canManageContent = false;
+        
+        if ($user) {
+            $isAdmin = $user instanceof \App\Models\Admin;
+            if ($isAdmin) {
+                $canManageContent = in_array($user->role ?? null, ['super_admin','admin','editor']);
+            }
+        }
+        
+        return response()->json([
+            'status' => 'success',
+            'debug' => [
+                'authenticated' => $user !== null,
+                'user_type' => $user ? get_class($user) : null,
+                'user_id' => $user ? $user->id : null,
+                'is_admin' => $isAdmin,
+                'admin_role' => $isAdmin ? $user->role : null,
+                'can_manage_content' => $canManageContent,
+                'timestamp' => now()
+            ]
+        ]);
+    });
+    
     Route::middleware(['auth:sanctum', 'is.admin'])->group(function () {
         Route::get('/me', [AdminAuthController::class, 'me']);
         Route::post('/logout', [AdminAuthController::class, 'logout']);

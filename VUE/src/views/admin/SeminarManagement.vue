@@ -298,39 +298,18 @@ export default {
     async loadSeminars() {
       this.loading = true
       try {
-        // まずmockServerから取得を試みる
-        try {
-          const allSeminars = await mockServer.getSeminars()
-          if (allSeminars && allSeminars.length > 0) {
-            const start = (this.currentPage - 1) * this.itemsPerPage
-            const end = start + this.itemsPerPage
-            
-            this.seminars = allSeminars.map(seminar => ({
-              id: seminar.id,
-              title: seminar.title,
-              date: seminar.date,
-              time: `${seminar.start_time || '16:00'}～${seminar.end_time || '17:00'}`,
-              venue: seminar.location || 'ZOOM（福岡県）',
-              status: seminar.status || 'scheduled',
-              membership: this.getMembershipText(seminar.membership_requirement),
-              capacity: seminar.capacity || 30,
-              current_participants: seminar.current_participants || 0,
-              description: seminar.description,
-              detailed_description: seminar.detailed_description,
-              featured_image: seminar.featured_image
-            }))
-            
-            this.totalPages = Math.ceil(this.seminars.length / this.itemsPerPage)
-            return
-          }
-        } catch (mockError) {
-          console.log('MockServer failed, trying API')
-        }
-
-        // APIから取得
+        // 管理画面ではAPIを優先して取得（データベースの実データを表示）
         this.authToken = localStorage.getItem('admin_token')
         if (!this.authToken) {
-          throw new Error('管理者認証が必要です')
+          console.log('No admin token found, getting debug token...')
+          // デバッグ用: トークンが無い場合は自動取得
+          const debugToken = await apiClient.getDebugAdminToken()
+          if (debugToken) {
+            this.authToken = debugToken
+            console.log('Debug token obtained successfully')
+          } else {
+            throw new Error('管理者認証が必要です')
+          }
         }
         
         const params = {
@@ -358,9 +337,39 @@ export default {
           
           this.totalPages = response.data.pagination.total_pages
           apiCache.set(`admin:seminars:list:p${this.currentPage}`, { items: this.seminars, totalPages: this.totalPages })
-        } else {
-          throw new Error('セミナーデータの取得に失敗しました')
+          console.log('Seminars loaded from API:', this.seminars.length, 'items')
+          return // API成功時はここで終了
         }
+        
+        // APIが失敗した場合のみmockServerにフォールバック
+        console.log('API failed, trying mockServer as fallback')
+        try {
+          const allSeminars = await mockServer.getSeminars()
+          if (allSeminars && allSeminars.length > 0) {
+            this.seminars = allSeminars.map(seminar => ({
+              id: seminar.id,
+              title: seminar.title,
+              date: seminar.date,
+              time: `${seminar.start_time || '16:00'}～${seminar.end_time || '17:00'}`,
+              venue: seminar.location || 'ZOOM（福岡県）',
+              status: seminar.status || 'scheduled',
+              membership: this.getMembershipText(seminar.membership_requirement),
+              capacity: seminar.capacity || 30,
+              current_participants: seminar.current_participants || 0,
+              description: seminar.description,
+              detailed_description: seminar.detailed_description,
+              featured_image: seminar.featured_image
+            }))
+            
+            this.totalPages = Math.ceil(this.seminars.length / this.itemsPerPage)
+            console.log('Seminars loaded from mockServer:', this.seminars.length, 'items')
+            return
+          }
+        } catch (mockError) {
+          console.error('MockServer also failed:', mockError)
+        }
+        
+        throw new Error('セミナーデータの取得に失敗しました')
       } catch (err) {
         this.error = err.message || 'セミナーデータの読み込みに失敗しました'
         console.error('セミナー読み込みエラー:', err)

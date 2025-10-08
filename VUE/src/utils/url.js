@@ -1,6 +1,8 @@
 // Utilities to resolve media URLs for <img src>
 // Keeps design stable by not forcing API base for frontend assets
 
+import { getApiBaseUrl } from '@/config/api.js'
+
 export function resolveMediaUrl(input) {
   if (!input) return ''
   const url = String(input)
@@ -11,9 +13,20 @@ export function resolveMediaUrl(input) {
     return url
   }
 
-  // Storage URLs
-  if (url.startsWith('/storage/')) return url
-  if (url.startsWith('storage/')) return `/${url}`
+  const apiBaseUrl = getApiBaseUrl()
+
+  // Storage URLs - prepend API host
+  if (url.startsWith('/storage/')) {
+    return `${apiBaseUrl}${url}`
+  }
+  if (url.startsWith('storage/')) {
+    return `${apiBaseUrl}/${url}`
+  }
+
+  // Frontend-bundled assets
+  if (url.startsWith('/img/') || url.startsWith('/images/') || url.startsWith('/assets/') || url.startsWith('/favicon')) {
+    return url
+  }
 
   // Heuristic: admin uploads for the media registry often name files like
   // "media-<key>-<timestamp>.<ext>" (when pageKey is "media") or
@@ -25,26 +38,24 @@ export function resolveMediaUrl(input) {
   //   company-profile-company_profile_message-1757855317.svg
   if (!url.includes('/') && /\.(png|jpe?g|webp|gif|svg)$/i.test(url)) {
     if (lower.startsWith('media-')) {
-      return `/storage/pages/media/${url}`
+      return `${apiBaseUrl}/storage/pages/media/${url}`
     }
     if (lower.startsWith('company-profile-')) {
-      return `/storage/pages/company-profile/${url}`
+      return `${apiBaseUrl}/storage/pages/company-profile/${url}`
     }
     // Fallback: assume it's on public disk root
-    return `/storage/${url}`
+    return `${apiBaseUrl}/storage/${url}`
   }
 
-  // Frontend-bundled assets
-  if (url.startsWith('/img/') || url.startsWith('/images/') || url.startsWith('/assets/') || url.startsWith('/favicon')) {
-    return url
+  // Other root-relative paths starting with / (like /publications/covers/...)
+  // These need both API host and /storage/ prefix
+  if (url.startsWith('/')) {
+    return `${apiBaseUrl}/storage${url}`
   }
-
-  // Other root-relative paths: leave as-is (resolved by current origin)
-  if (url.startsWith('/')) return url
 
   // Fallback: assume public disk relative path (strip leading 'public/')
   const path = url.replace(/^public\//, '')
-  return `/storage/${path}`
+  return `${apiBaseUrl}/storage/${path}`
 }
 
 export default { resolveMediaUrl }

@@ -21,7 +21,7 @@
             <div class="form-group">
               <label class="form-label">サムネイル画像（カバー） <span class="required">*</span></label>
               <div class="image-picker">
-                <img v-if="coverPreview || formData.cover_image" :src="coverPreview || formData.cover_image" alt="cover preview" class="image-preview" />
+                <img v-if="resolvedCoverImage" :src="resolvedCoverImage" alt="cover preview" class="image-preview" />
                 <input type="file" accept="image/*" @change="onPickCover" />
               </div>
               <p class="form-help">推奨サイズの比率を維持してアップロードしてください。（最大5MB）</p>
@@ -253,6 +253,7 @@
 import AdminLayout from './AdminLayout.vue'
 import apiClient from '../../services/apiClient'
 import mockServer from '@/mockServer'
+import { resolveMediaUrl } from '@/utils/url.js'
 
 export default {
   name: 'PublicationEditForm',
@@ -315,6 +316,15 @@ export default {
         }
       }
       return opts
+    },
+    resolvedCoverImage() {
+      // If there's a preview from file upload, use that
+      if (this.coverPreview) return this.coverPreview
+      // Otherwise resolve the cover_image URL with API host
+      if (this.formData.cover_image) {
+        return resolveMediaUrl(this.formData.cover_image)
+      }
+      return ''
     }
   },
   async mounted() {

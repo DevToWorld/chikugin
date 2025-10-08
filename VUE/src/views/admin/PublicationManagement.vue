@@ -307,34 +307,7 @@ export default {
     async loadPublications(opts = { silent: false }) {
       if (!opts || !opts.silent) this.loading = true
       try {
-        // まずmockServerから取得を試みる
-        try {
-          const allPublications = await mockServer.getPublications()
-          if (allPublications && allPublications.length > 0) {
-            const start = (this.currentPage - 1) * this.itemsPerPage
-            const end = start + this.itemsPerPage
-            
-            this.publications = allPublications.map(pub => ({
-              id: pub.id,
-              title: pub.title,
-              date: pub.publication_date,
-              category: this.getCategoryText(pub.category),
-              userType: this.getUserTypeText(pub.membership_level),
-              description: pub.description,
-              author: pub.author,
-              is_published: pub.is_published,
-              is_downloadable: pub.file_url ? true : false
-            }))
-            
-            this.totalPages = Math.ceil(this.publications.length / this.itemsPerPage)
-            apiCache.set(`admin:pub:list:p${this.currentPage}`, this.publications)
-            return
-          }
-        } catch (mockError) {
-          console.log('MockServer failed, trying API')
-        }
-
-        // APIから取得
+        // 管理画面ではAPIを優先して取得（データベースの実データを表示）
         this.authToken = localStorage.getItem('admin_token')
         if (!this.authToken) {
           console.log('No admin token found, getting debug token...')
@@ -373,10 +346,35 @@ export default {
           }))
           this.totalPages = (pag?.pagination?.total_pages) || pag?.last_page || 1
           apiCache.set(`admin:pub:list:p${this.currentPage}`, this.publications)
-          console.log('Publications loaded:', this.publications.length, 'items')
-        } else {
-          throw new Error('刊行物データの取得に失敗しました')
+          console.log('Publications loaded from API:', this.publications.length, 'items')
+          return // API成功時はここで終了
         }
+        
+        // APIが失敗した場合のみmockServerにフォールバック
+        console.log('API failed, trying mockServer as fallback')
+        try {
+          const allPublications = await mockServer.getPublications()
+          if (allPublications && allPublications.length > 0) {
+            this.publications = allPublications.map(pub => ({
+              id: pub.id,
+              title: pub.title,
+              date: pub.publication_date,
+              category: this.getCategoryText(pub.category),
+              userType: this.getUserTypeText(pub.membership_level),
+              description: pub.description,
+              author: pub.author,
+              is_published: pub.is_published,
+              is_downloadable: pub.file_url ? true : false
+            }))
+            this.totalPages = Math.ceil(this.publications.length / this.itemsPerPage)
+            console.log('Publications loaded from mockServer:', this.publications.length, 'items')
+            return
+          }
+        } catch (mockError) {
+          console.error('MockServer also failed:', mockError)
+        }
+        
+        throw new Error('刊行物データの取得に失敗しました')
       } catch (err) {
         this.error = err.message || '刊行物データの読み込みに失敗しました'
         console.error('刊行物読み込みエラー:', err)

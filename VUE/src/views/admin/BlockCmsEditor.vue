@@ -23,11 +23,11 @@
           <div class="field">
             <label>ヒーロー画像（hero）</label>
             <div class="page-image-row">
-              <div class="img-preview"><img :src="getImageUrlByKey('hero') || ''" alt="preview"/></div>
+              <div class="img-preview" @click="uploadForKey('hero')"><img :src="getImageUrlByKey('hero') || ''" alt="preview"/></div>
               <div class="img-meta">
                 <div class="img-key">images.hero</div>
                 <div class="img-actions">
-                  <button class="btn" @click="uploadForKey('hero')">アップロードファイル</button>
+                  <button class="btn" @click="uploadForKey('hero')">{{ getImageUrlByKey('hero') ? '画像を変更' : 'アップロードファイル' }}</button>
                 </div>
               </div>
             </div>
@@ -328,12 +328,12 @@
             <div class="field">
               <label>特集画像（featured_image）</label>
               <div class="page-image-row">
-                <div class="img-preview"><img :src="getImageUrlByKey('featured_image') || ''" alt="preview"/></div>
+                <div class="img-preview" @click="triggerCompanyImageUpload('featured_image')"><img :src="getImageUrlByKey('featured_image') || ''" alt="preview"/></div>
                 <div class="img-meta">
                   <div class="img-key">images.featured_image</div>
                   <div class="img-actions">
                     <input ref="img_featured_image" type="file" accept="image/*" style="display:none" @change="onCompanyImageSelected('featured_image', $event)" />
-                    <button class="btn" @click="triggerCompanyImageUpload('featured_image')">アップロードファイル</button>
+                    <button class="btn" @click="triggerCompanyImageUpload('featured_image')">{{ getImageUrlByKey('featured_image') ? '画像を変更' : 'アップロードファイル' }}</button>
                   </div>
                 </div>
               </div>
@@ -2133,6 +2133,7 @@
 import AdminLayout from './AdminLayout.vue'
 import apiClient from '@/services/apiClient'
 import { getApiUrl } from '@/config/api.js'
+import { resolveMediaUrl } from '@/utils/url.js'
 
 const CONTACT_BASIC_KEYS = ['form_title', 'form_label_subject', 'form_placeholder_select']
 const CONTACT_OPTION_KEYS = ['form_option_inquiry', 'form_option_membership', 'form_option_seminar', 'form_option_other']
@@ -2893,8 +2894,14 @@ export default {
     getRegistryImageUrl(key){
       try {
         const m = this._media
-        if (m && typeof m.getResponsiveImage === 'function') return m.getResponsiveImage(key, '') || ''
-        if (m && typeof m.getImage === 'function') return m.getImage(key, '') || ''
+        if (m && typeof m.getResponsiveImage === 'function') {
+          const url = m.getResponsiveImage(key, '') || ''
+          return url ? resolveMediaUrl(url) : ''
+        }
+        if (m && typeof m.getImage === 'function') {
+          const url = m.getImage(key, '') || ''
+          return url ? resolveMediaUrl(url) : ''
+        }
       } catch(_) {}
       return ''
     },
@@ -3230,9 +3237,30 @@ export default {
       }
     },
     triggerReplace(idx){
+      console.log('triggerReplace called with idx:', idx)
       const r = this.$refs[`replace_${idx}`]
-      if (r && r[0] && typeof r[0].click === 'function') r[0].click()
-      else if (r && typeof r.click === 'function') r.click()
+      if (r && r[0] && typeof r[0].click === 'function') {
+        console.log('Clicking replace input via ref array')
+        r[0].click()
+      } else if (r && typeof r.click === 'function') {
+        console.log('Clicking replace input via ref')
+        r.click()
+      } else {
+        console.log('Replace ref not found, using fallback global input')
+        // Fallback: use global input and set the key to replace
+        const item = this.pageImages[idx]
+        if (item && item.key) {
+          this.newImageKey = item.key
+          this.replacingExistingKey = true
+          if (this.$refs.newImageInputGlobal && typeof this.$refs.newImageInputGlobal.click === 'function') {
+            console.log('Clicking newImageInputGlobal for replace')
+            this.$refs.newImageInputGlobal.click()
+          } else if (this.$refs.newImageInputAny && typeof this.$refs.newImageInputAny.click === 'function') {
+            console.log('Clicking newImageInputAny for replace')
+            this.$refs.newImageInputAny.click()
+          }
+        }
+      }
     },
     async onReplacePageImage(idx, e){
       try {
@@ -3552,10 +3580,10 @@ export default {
     resolveCompanyStaffPreview(member){
       if (!member) return TRANSPARENT_PIXEL
       const direct = member.image_url && member.image_url.trim()
-      if (direct) return direct
+      if (direct) return resolveMediaUrl(direct)
       const fromKey = member.image_key ? this.getImageUrlByKey(member.image_key) : ''
       if (fromKey) return fromKey
-      if (member.image && typeof member.image === 'object' && member.image.url) return member.image.url
+      if (member.image && typeof member.image === 'object' && member.image.url) return resolveMediaUrl(member.image.url)
       const legacy = COMPANY_STAFF_LEGACY.find(it => it.imageKey === member.image_key || it.id === member.id)
       if (legacy && legacy.fallbackImage) return legacy.fallbackImage
       return TRANSPARENT_PIXEL
@@ -3878,26 +3906,26 @@ export default {
       try {
         const item = (this.pageImages || []).find(it => it.key === key)
         const direct = item ? (item.url || '') : ''
-        if (direct && !this.isPlaceholderUrl(direct)) return direct
+        if (direct && !this.isPlaceholderUrl(direct)) return resolveMediaUrl(direct)
         // Try per-page mapping and global media like the public pages do
         try {
           const mk = (this.mediaKeys && this.mediaKeys[key]) ? this.mediaKeys[key] : this.defaultMediaKeyForSlot(key)
           if (this._pageMedia && typeof this._pageMedia.getResponsiveSlot === 'function') {
             const slot = this._pageMedia.getResponsiveSlot(key, mk, '')
-            if (slot) return slot
+            if (slot) return resolveMediaUrl(slot)
           }
           if (this._media) {
             if (typeof this._media.getResponsiveImage === 'function') {
               const v = this._media.getResponsiveImage(mk, '')
-              if (v) return v
+              if (v) return resolveMediaUrl(v)
             }
             if (typeof this._media.getImage === 'function') {
               const v = this._media.getImage(mk, '')
-              if (v) return v
+              if (v) return resolveMediaUrl(v)
             }
           }
         } catch(_) {}
-        return direct || ''
+        return direct ? resolveMediaUrl(direct) : ''
       } catch(_) { return '' }
     },
     expectedImageKeys(){
@@ -4011,21 +4039,32 @@ export default {
     },
     uploadForKey(key){
       try {
+        console.log('uploadForKey called with key:', key)
         const idx = (this.pageImages||[]).findIndex(it => it.key === key)
+        console.log('pageImages index:', idx)
         if (idx >= 0) {
+          console.log('Triggering replace for existing image')
           this.triggerReplace(idx)
         } else {
+          console.log('Adding new image with key:', key)
           this.newImageKey = key
           // 一覧表示がオフのときでも動作させる（グローバル用 hidden input をフォールバック）
           if (this.$refs.newImageInput && typeof this.$refs.newImageInput.click === 'function') {
+            console.log('Clicking newImageInput')
             this.$refs.newImageInput.click()
           } else if (this.$refs.newImageInputGlobal && typeof this.$refs.newImageInputGlobal.click === 'function') {
+            console.log('Clicking newImageInputGlobal')
             this.$refs.newImageInputGlobal.click()
           } else if (this.$refs.newImageInputAny && typeof this.$refs.newImageInputAny.click === 'function') {
+            console.log('Clicking newImageInputAny')
             this.$refs.newImageInputAny.click()
+          } else {
+            console.error('No file input ref found!')
           }
         }
-      } catch(_) {}
+      } catch(err) {
+        console.error('uploadForKey error:', err)
+      }
     },
     triggerCompanyImageUpload(key){
       const refName = `img_${key}`
@@ -4392,8 +4431,11 @@ export default {
   .help{ color:#777; font-size:12px; }
   /* Preview panel removed */
   .page-image-row{ display:flex; gap:12px; align-items:center; border:1px solid #eee; border-radius:8px; padding:10px; margin-bottom:8px; background:#fafafa; }
-  .img-preview{ width:120px; height:80px; background:#fff; border:1px solid #eee; display:flex; align-items:center; justify-content:center; }
-  .img-preview img{ max-width:100%; max-height:100%; object-fit:contain; }
+  .img-preview{ width:120px; height:80px; background:#fff; border:1px solid #eee; display:flex; align-items:center; justify-content:center; cursor:pointer; position:relative; transition:border-color 0.2s; }
+  .img-preview:hover{ border-color:#da5761; }
+  .img-preview::after{ content:'クリックしてアップロード'; position:absolute; bottom:0; left:0; right:0; background:rgba(0,0,0,0.7); color:#fff; font-size:10px; padding:4px; text-align:center; opacity:0; transition:opacity 0.2s; }
+  .img-preview:hover::after{ opacity:1; }
+  .img-preview img{ max-width:100%; max-height:100%; object-fit:contain; pointer-events:none; }
   .img-meta{ display:flex; flex-direction:column; gap:6px; }
   .img-key{ font-weight:600; }
   .img-file{ color:#777; font-size:12px; }
@@ -4411,3 +4453,4 @@ export default {
     .layout-grid{ grid-template-columns: 1fr; }
   }
   </style>
+
