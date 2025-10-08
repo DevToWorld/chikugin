@@ -21,7 +21,7 @@ return [
     'allowed_methods' => ['*'],
 
     // Exact origins (no wildcards). For production, set CORS_ALLOWED_ORIGINS env, comma-separated.
-    'allowed_origins' => array_filter(array_map('trim', explode(',', (string) env('CORS_ALLOWED_ORIGINS', 'https://modeitest.vercel.app,http://localhost:3000,http://localhost:8080,http://localhost:5173')))),
+    'allowed_origins' => array_filter(array_map('trim', explode(',', (string) env('CORS_ALLOWED_ORIGINS', 'https://modeitest.vercel.app,https://linkinc.sakura.jp,http://localhost:3000,http://localhost:8080,http://localhost:5173')))),
 
     // Regex patterns for dynamic subdomains (works with credentials as the matched origin is echoed back)
     'allowed_origins_patterns' => array_filter(array_map(function ($p) { return trim($p); }, explode(',', (string) env('CORS_ALLOWED_ORIGIN_PATTERNS', '/^https:\/\/.*\.vercel\.app$/,/^https:\/\/.*\.railway\.app$/')))),
