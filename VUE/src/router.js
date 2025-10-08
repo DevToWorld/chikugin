@@ -758,7 +758,7 @@ const router = new Router({
 const PAGE_KEYS_BY_ROUTE = {
   // Public pages with CMS text usage
   top: ['home'],
-  company: ['company-profile'],
+  company: ['company'],
   aboutus: ['about-institute'],
   privacy: ['privacy'],
   terms: ['terms'],

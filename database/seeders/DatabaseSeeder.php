@@ -22,6 +22,9 @@ class DatabaseSeeder extends Seeder
             CmsV2DefaultPagesSeeder::class,
             CmsV2AdditionalPagesSeeder::class,
             CmsV2FlowPagesSeeder::class,
+            CmsV2CleanupAboutPageSeeder::class, // Remove about/aboutus/about-institute (use OLD PageContent)
+            CmsV2SectionsSeeder::class,
+            CmsV2PublishPagesSeeder::class,
             // コンテンツ系シード（一覧が空にならないように含める）
             NewsArticlesSeeder::class,
             SeminarSeeder::class,

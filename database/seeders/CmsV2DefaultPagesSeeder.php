@@ -15,9 +15,7 @@ class CmsV2DefaultPagesSeeder extends Seeder
             ['slug' => 'home', 'title' => 'home'],
             ['slug' => 'company', 'title' => 'company'],
             ['slug' => 'company-profile', 'title' => 'company-profile'],
-            ['slug' => 'about', 'title' => 'about'],
-            ['slug' => 'aboutus', 'title' => 'aboutus'],
-            ['slug' => 'about-institute', 'title' => 'about-institute'],
+            // Note: 'about', 'aboutus', 'about-institute' use OLD PageContent system, not CMS V2
             ['slug' => 'services', 'title' => 'services'],
             ['slug' => 'contact', 'title' => 'contact'],
 

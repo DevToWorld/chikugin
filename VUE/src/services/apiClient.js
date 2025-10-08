@@ -129,7 +129,7 @@ class ApiClient {
       ...(options && options.params ? { params: undefined } : {}),
       ...(options && options.timeout ? { timeout: undefined } : {})
     }
-
+    
     try {
       const response = await fetch(url, config)
 
@@ -186,6 +186,7 @@ class ApiClient {
 
   // GET request
   async get(endpoint, options = {}) {
+    console.log('get', endpoint, options)
     return this.request(endpoint, {
       method: 'GET',
       ...options

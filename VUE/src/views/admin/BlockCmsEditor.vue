@@ -2666,7 +2666,7 @@ export default {
         }
       },
       // PageContent(CmsText) 側のキー。ページ選択時に推定（UIで変更可）
-      pageContentKey: 'privacy',
+      pageContentKey: '',  // changed from 'privacy' to empty - set dynamically when page selected
       // editor-side media registry refs for public-like preview resolution
       _media: null,
       _pageMedia: null,
@@ -2727,7 +2727,7 @@ export default {
       if (!key) return false
       if (this.excludeKeys.has(key)) return false
       // 既に専用UIがあるものは除外
-      const specialized = new Set(['privacy','terms','transaction-law','company-profile','cri-consulting','about-institute','about','membership','standard-membership','premium-membership','contact','membership-application','seminar-application','navigation','footer'])
+      const specialized = new Set(['privacy-policy','terms','transaction-law','company-profile','company','cri-consulting','about-institute','membership','standard-membership','premium-membership','contact','membership-application','seminar-application','navigation','footer'])  // added 'company'
       if (specialized.has(key)) return false
       // texts/htmls のどちらかがあるときに表示
       const hasTexts = this.genericTexts && Object.keys(this.genericTexts).length > 0
@@ -2800,13 +2800,15 @@ export default {
         const assignTexts = (texts) => {
           if (!texts) return
           switch (key) {
-            case 'privacy': mergeMissing(this.privacyTexts, texts); break
+            case 'privacy-policy': mergeMissing(this.privacyTexts, texts); break
+            // 'privacy' removed - use privacy-policy only
             case 'terms': mergeMissing(this.termsTexts, texts); break
             case 'transaction-law': mergeMissing(this.tlTexts, texts); break
             case 'company-profile': mergeMissing(this.companyTexts, texts); break
+            case 'company': mergeMissing(this.companyTexts, texts); break  // added for company page
             case 'cri-consulting': mergeMissing(this.consultingTexts, texts); break
             case 'about-institute': mergeMissing(this.aboutTexts, texts); break
-            case 'about': mergeMissing(this.aboutTexts, texts); break
+            // 'about' removed - page doesn't exist
             case 'membership': mergeMissing(this.membershipTexts, texts); break
             case 'standard-membership': mergeMissing(this.standardTexts, texts); break
             case 'premium-membership': mergeMissing(this.premiumTexts, texts); break
@@ -2826,9 +2828,10 @@ export default {
             case 'terms': mergeMissing(this.termsHtmls, htmls); break
             case 'transaction-law': mergeMissing(this.tlHtmls, htmls); break
             case 'company-profile': mergeMissing(this.companyHtmls, htmls); break
+            case 'company': mergeMissing(this.companyHtmls, htmls); break  // added for company page
             case 'cri-consulting': mergeMissing(this.consultingHtmls, htmls); break
             case 'about-institute': mergeMissing(this.aboutHtmls, htmls); break
-            case 'about': mergeMissing(this.aboutHtmls, htmls); break
+            // 'about' removed - page doesn't exist
             case 'contact': mergeMissing(this.contactHtmls, htmls); break
             default: mergeMissing(this.genericHtmls, htmls); break
           }
@@ -2852,19 +2855,20 @@ export default {
       const k = String(key || '').toLowerCase()
       switch (k) {
         case 'privacy':
-          return ['privacy', 'privacy-policy', 'privacy-poricy', 'privacy poricy']
+          return ['privacy-policy']  // removed 'privacy' standalone - use privacy-policy only
         case 'terms':
           return ['terms', 'terms-of-service']
         case 'transaction-law':
-          return ['transaction-law', 'legal', 'commercial-law']
+          return ['transaction-law']  // removed: 'legal', 'commercial-law'
         case 'company-profile':
-          return ['company-profile', 'company']
+          return ['company-profile']  // removed 'company' - use company-profile only
+        case 'company':
+          return ['company']  // company page uses its own key, not company-profile
         case 'cri-consulting':
           return ['cri-consulting', 'consulting']
         case 'about-institute':
-          return ['about-institute', 'aboutus', 'about']
-        case 'about':
-          return ['about', 'aboutus', 'about-institute']
+          return ['about-institute', 'aboutus']
+        // 'about' case removed - page doesn't exist, redirects to /company
         case 'membership':
           return ['membership', 'services']
         case 'standard-membership':
@@ -2995,16 +2999,17 @@ export default {
       if (s === 'seminars' || s.startsWith('seminars/')) return 'seminars'
       if (s.includes('seminars-current')) return 'seminars-current'
       if (s.includes('seminars-past')) return 'seminars-past'
-      if (s.includes('privacy')) return 'privacy'
+      if (s.includes('privacy')) return 'privacy-policy'  // always use privacy-policy, not privacy
       if (s.includes('legal') || s.includes('transaction')) return 'transaction-law'
       if (s.includes('terms')) return 'terms'
       if (s.includes('economic-indicators')) return 'economic-indicators'
       if (s.includes('economic-statistics')) return 'economic-statistics'
       if (s.includes('publications')) return 'publications'
-      if (s.includes('company')) return 'company-profile'
+      if (s === 'company') return 'company'  // exact match for company (check before includes)
+      if (s.includes('company')) return 'company-profile'  // company-profile contains 'company'
       if (s.includes('consult')) return 'cri-consulting'
       if (s.includes('aboutus')) return 'about-institute'
-      if (s.includes('about')) return 'about'
+      // 'about' removed - page doesn't exist, redirects to /company
       if (s.includes('sitemap')) return 'sitemap'
       if (s.includes('faq')) return 'faq'
       if (s.includes('glossary')) return 'glossary'
@@ -3051,16 +3056,17 @@ export default {
         this.collectWarnings([hero, rich])
         // 推奨のPageContentキーを推定
         const slug = (this.currentPage.slug || '').toLowerCase()
-        if (slug.includes('privacy')) this.pageContentKey = 'privacy'
+        if (slug.includes('privacy')) this.pageContentKey = 'privacy-policy'  // always privacy-policy
         else if (slug.includes('legal') || slug.includes('transaction')) this.pageContentKey = 'transaction-law'
         else if (slug.includes('terms')) this.pageContentKey = 'terms'
-        else if (slug.includes('company')) this.pageContentKey = 'company-profile'
+        else if (slug === 'company') this.pageContentKey = 'company'  // exact match for company
+        else if (slug.includes('company')) this.pageContentKey = 'company-profile'  // company-profile
         else if (slug.includes('economic-indicators')) this.pageContentKey = 'economic-indicators'
         else if (slug.includes('economic-statistics')) this.pageContentKey = 'economic-statistics'
         else if (slug.includes('publications')) this.pageContentKey = 'publications'
         else if (slug.includes('consult')) this.pageContentKey = 'cri-consulting'
         else if (slug.includes('aboutus')) this.pageContentKey = 'about-institute'
-        else if (slug.includes('about')) this.pageContentKey = 'about'
+        // removed: else if (slug.includes('about')) - about page doesn't exist
         else if (slug.includes('sitemap')) this.pageContentKey = 'sitemap'
         else if (slug.includes('faq')) this.pageContentKey = 'faq'
         else if (slug.includes('glossary')) this.pageContentKey = 'glossary'
@@ -4150,8 +4156,8 @@ export default {
           this.pageContentKey,
           // common fallbacks
           'terms', 'transaction-law', 'company-profile', 'consulting', 'about-institute',
-          'about', 'sitemap', 'faq', 'glossary', 'membership', 'home', 'services',
-          'privacy', 'privacy-poricy', 'privacy-policy', 'privacy poricy'
+          'sitemap', 'faq', 'glossary', 'membership', 'home', 'services',
+          'privacy-policy'  // removed: 'about', 'privacy', 'privacy-poricy', 'privacy poricy'
         ]
         let foundKey = null
         let res = null
