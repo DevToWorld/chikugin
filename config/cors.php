@@ -24,7 +24,7 @@ return [
     'allowed_origins' => array_filter(array_map('trim', explode(',', (string) env('CORS_ALLOWED_ORIGINS', 'https://modeitest.vercel.app,https://linkinc.sakura.jp,http://localhost:3000,http://localhost:8080,http://localhost:5173')))),
 
     // Regex patterns for dynamic subdomains (works with credentials as the matched origin is echoed back)
-    'allowed_origins_patterns' => array_filter(array_map(function ($p) { return trim($p); }, explode(',', (string) env('CORS_ALLOWED_ORIGIN_PATTERNS', '/^https:\/\/.*\.vercel\.app$/,/^https:\/\/.*\.railway\.app$/')))),
+    'allowed_origins_patterns' => array_filter(array_map(function ($p) { return trim($p); }, explode(',', (string) env('CORS_ALLOWED_ORIGIN_PATTERNS', '/^https:\/\/.*\.vercel\.app$/,/^https:\/\/.*\.railway\.app$/,/^https:\/\/.*\.sakura\.jp$/')))),
 
     // Be explicit for some proxies that dislike '*'
     'allowed_headers' => array_filter(array_map('trim', explode(',', (string) env('CORS_ALLOWED_HEADERS', 'Accept,Authorization,Content-Type,Origin,X-Requested-With')))),
