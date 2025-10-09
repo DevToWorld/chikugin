@@ -61,7 +61,7 @@
            
            <div class="publication-image">
              <img 
-               :src="publication.cover_image_url || publication.cover_image || publication.image_url || '/img/image-1.png'" 
+               :src="resolvePublicationImage(publication)" 
                :alt="publication.title"
                @error="onImgError"
              />
@@ -130,6 +130,7 @@ import { frame132131753022Data } from "../data";
 import apiClient from '../services/apiClient.js';
 import { useMemberAuth } from '@/composables/useMemberAuth'
 import { usePageText } from '@/composables/usePageText'
+import { resolveMediaUrl } from '@/utils/url.js'
 
 export default {
   name: "PublicationDetailPage",
@@ -264,10 +265,11 @@ export default {
     },
     
     formatPublicationData(publicationData, meta = {}) {
+      const rawImage = publicationData.cover_image_url || publicationData.cover_image || publicationData.image_url || '/img/image-1.png'
       return {
         ...publicationData,
-        // 画像プロパティを統一（cover_image_url を優先）
-        image_url: publicationData.cover_image_url || publicationData.cover_image || publicationData.image_url || '/img/image-1.png',
+        // 画像プロパティを統一（cover_image_url を優先）し、API URLを解決
+        image_url: resolveMediaUrl(rawImage),
         isDownloadable: publicationData.is_downloadable || false,
         membersOnly: publicationData.members_only || false,
         membershipLevel: publicationData.membership_level || (publicationData.members_only ? 'standard' : 'free'),
@@ -275,6 +277,12 @@ export default {
           ? !!meta.can_download
           : !!(publicationData.is_downloadable && publicationData.file_url)
       };
+    },
+    
+    resolvePublicationImage(publication) {
+      if (!publication) return '/img/image-1.png'
+      const rawImage = publication.cover_image_url || publication.cover_image || publication.image_url || '/img/image-1.png'
+      return resolveMediaUrl(rawImage)
     },
     
     formatDetailDate(dateString) {

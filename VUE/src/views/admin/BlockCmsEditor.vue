@@ -216,10 +216,10 @@
             <div class="field">
               <label>項目1（standard_service1_image）</label>
               <div class="page-image-row">
-                <div class="img-preview"><img :src="getImageUrlByKey('standard_service1_image') || ''" alt="preview"/></div>
+                <div class="img-preview" @click="triggerCompanyImageUpload('standard_service1_image')"><img :src="getImageUrlByKey('standard_service1_image') || ''" alt="preview"/></div>
                 <div class="img-meta">
                   <div class="img-actions">
-                    <input ref="img_std_service1_image" type="file" accept="image/*" style="display:none" @change="onCompanyImageSelected('standard_service1_image', $event)" />
+                    <input ref="img_standard_service1_image" type="file" accept="image/*" style="display:none" @change="onCompanyImageSelected('standard_service1_image', $event)" />
                     <button class="btn" @click="triggerCompanyImageUpload('standard_service1_image')">アップロードファイル</button>
                   </div>
                 </div>
@@ -228,10 +228,10 @@
             <div class="field">
               <label>項目2（standard_service2_image）</label>
               <div class="page-image-row">
-                <div class="img-preview"><img :src="getImageUrlByKey('standard_service2_image') || ''" alt="preview"/></div>
+                <div class="img-preview" @click="triggerCompanyImageUpload('standard_service2_image')"><img :src="getImageUrlByKey('standard_service2_image') || ''" alt="preview"/></div>
                 <div class="img-meta">
                   <div class="img-actions">
-                    <input ref="img_std_service2_image" type="file" accept="image/*" style="display:none" @change="onCompanyImageSelected('standard_service2_image', $event)" />
+                    <input ref="img_standard_service2_image" type="file" accept="image/*" style="display:none" @change="onCompanyImageSelected('standard_service2_image', $event)" />
                     <button class="btn" @click="triggerCompanyImageUpload('standard_service2_image')">アップロードファイル</button>
                   </div>
                 </div>
@@ -240,10 +240,10 @@
             <div class="field">
               <label>項目3（standard_service3_image）</label>
               <div class="page-image-row">
-                <div class="img-preview"><img :src="getImageUrlByKey('standard_service3_image') || ''" alt="preview"/></div>
+                <div class="img-preview" @click="triggerCompanyImageUpload('standard_service3_image')"><img :src="getImageUrlByKey('standard_service3_image') || ''" alt="preview"/></div>
                 <div class="img-meta">
                   <div class="img-actions">
-                    <input ref="img_std_service3_image" type="file" accept="image/*" style="display:none" @change="onCompanyImageSelected('standard_service3_image', $event)" />
+                    <input ref="img_standard_service3_image" type="file" accept="image/*" style="display:none" @change="onCompanyImageSelected('standard_service3_image', $event)" />
                     <button class="btn" @click="triggerCompanyImageUpload('standard_service3_image')">アップロードファイル</button>
                   </div>
                 </div>
@@ -252,10 +252,10 @@
             <div class="field">
               <label>項目4（standard_service4_image）</label>
               <div class="page-image-row">
-                <div class="img-preview"><img :src="getImageUrlByKey('standard_service4_image') || ''" alt="preview"/></div>
+                <div class="img-preview" @click="triggerCompanyImageUpload('standard_service4_image')"><img :src="getImageUrlByKey('standard_service4_image') || ''" alt="preview"/></div>
                 <div class="img-meta">
                   <div class="img-actions">
-                    <input ref="img_std_service4_image" type="file" accept="image/*" style="display:none" @change="onCompanyImageSelected('standard_service4_image', $event)" />
+                    <input ref="img_standard_service4_image" type="file" accept="image/*" style="display:none" @change="onCompanyImageSelected('standard_service4_image', $event)" />
                     <button class="btn" @click="triggerCompanyImageUpload('standard_service4_image')">アップロードファイル</button>
                   </div>
                 </div>
@@ -264,10 +264,10 @@
             <div class="field">
               <label>項目5（standard_service5_image）</label>
               <div class="page-image-row">
-                <div class="img-preview"><img :src="getImageUrlByKey('standard_service5_image') || ''" alt="preview"/></div>
+                <div class="img-preview" @click="triggerCompanyImageUpload('standard_service5_image')"><img :src="getImageUrlByKey('standard_service5_image') || ''" alt="preview"/></div>
                 <div class="img-meta">
                   <div class="img-actions">
-                    <input ref="img_std_service5_image" type="file" accept="image/*" style="display:none" @change="onCompanyImageSelected('standard_service5_image', $event)" />
+                    <input ref="img_standard_service5_image" type="file" accept="image/*" style="display:none" @change="onCompanyImageSelected('standard_service5_image', $event)" />
                     <button class="btn" @click="triggerCompanyImageUpload('standard_service5_image')">アップロードファイル</button>
                   </div>
                 </div>
@@ -4437,12 +4437,13 @@ export default {
   .help{ color:#777; font-size:12px; }
   /* Preview panel removed */
   .page-image-row{ display:flex; gap:12px; align-items:center; border:1px solid #eee; border-radius:8px; padding:10px; margin-bottom:8px; background:#fafafa; }
-  .img-preview{ width:120px; height:80px; background:#fff; border:1px solid #eee; display:flex; align-items:center; justify-content:center; cursor:pointer; position:relative; transition:border-color 0.2s; }
+  .img-preview{ width:120px; height:80px; background:#fff; border:1px solid #eee; display:flex; align-items:center; justify-content:center; cursor:pointer; position:relative; transition:border-color 0.2s; flex-shrink:0; }
   .img-preview:hover{ border-color:#da5761; }
-  .img-preview::after{ content:'クリックしてアップロード'; position:absolute; bottom:0; left:0; right:0; background:rgba(0,0,0,0.7); color:#fff; font-size:10px; padding:4px; text-align:center; opacity:0; transition:opacity 0.2s; }
+  .img-preview::after{ content:'クリックしてアップロード'; position:absolute; bottom:0; left:0; right:0; background:rgba(0,0,0,0.7); color:#fff; font-size:10px; padding:4px; text-align:center; opacity:0; transition:opacity 0.2s; pointer-events:none; }
   .img-preview:hover::after{ opacity:1; }
   .img-preview img{ max-width:100%; max-height:100%; object-fit:contain; pointer-events:none; }
-  .img-meta{ display:flex; flex-direction:column; gap:6px; }
+  .img-meta{ display:flex; flex-direction:column; gap:6px; flex:1; position:relative; z-index:1; }
+  .img-actions{ position:relative; z-index:2; }
   .img-key{ font-weight:600; }
   .img-file{ color:#777; font-size:12px; }
   /* Layout oriented editor */

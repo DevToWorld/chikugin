@@ -93,7 +93,7 @@
       <div class="featured-publication" v-if="featuredPublication">
         <div class="featured-content" @click="goToPublicationDetail(featuredPublication.id)">
           <div class="featured-image" v-restricted="{ requiredLevel: featuredPublication.membershipLevel || 'free' }">
-            <img src="/img/image-1.png" alt="経営戦略に関する書籍" />
+            <img :src="featuredPublication.image || '/img/image-1.png'" :alt="featuredPublication.title || '経営戦略に関する書籍'" />
           </div>
           <div class="featured-info">
             <div class="featured-meta">
@@ -234,6 +234,7 @@ import MembershipBadge from './MembershipBadge.vue';
 import { mapGetters } from 'vuex';
 import CmsText from '@/components/CmsText.vue';
 import { usePageText } from '@/composables/usePageText'
+import { resolveMediaUrl } from '@/utils/url.js'
 
 export default {
   name: "PublicationsMemberPage",
@@ -453,6 +454,10 @@ export default {
       const cachedList = apiCache.get('pub:list:member:last', 300)
       if (Array.isArray(cachedList) && cachedList.length) {
         this.publications = cachedList
+        // キャッシュから最初の刊行物を注目刊行物として設定
+        if (cachedList.length > 0) {
+          this.featuredPublication = cachedList[0]
+        }
         this.loading = false
       }
     } catch (e) { /* noop */ }
@@ -572,6 +577,10 @@ export default {
           this.publications = list
           apiCache.set('pub:list:member:last', list)
           this.totalPages = response.data.pagination.total_pages;
+          // 最初の刊行物を注目刊行物として設定
+          if (list.length > 0) {
+            this.featuredPublication = list[0]
+          }
         } else {
           // フォールバック: mockServer
           await this.loadFromMock();
@@ -588,21 +597,28 @@ export default {
       try {
         const allPublications = await mockServer.getPublications();
         if (allPublications && allPublications.length > 0) {
-          this.publications = allPublications.map(item => ({
-            id: item.id,
-            title: item.title,
-            image: item.cover_image_url || item.cover_image || item.image_url || '/img/-----2-2-4.png',
-            description: item.description,
-            category: item.category || 'special',
-            publication_date: item.publication_date,
-            author: item.author || 'ちくぎん地域経済研究所',
-            pages: item.pages,
-            file_size: item.file_size,
-            download_count: item.download_count,
-            is_published: item.is_published,
-            membershipLevel: item.membership_level || item.membershipLevel || 'free'
-          }));
+          this.publications = allPublications.map(item => {
+            const rawImage = item.cover_image_url || item.cover_image || item.image_url || '/img/-----2-2-4.png'
+            return {
+              id: item.id,
+              title: item.title,
+              image: resolveMediaUrl(rawImage),
+              description: item.description,
+              category: item.category || 'special',
+              publication_date: item.publication_date,
+              author: item.author || 'ちくぎん地域経済研究所',
+              pages: item.pages,
+              file_size: item.file_size,
+              download_count: item.download_count,
+              is_published: item.is_published,
+              membershipLevel: item.membership_level || item.membershipLevel || 'free'
+            }
+          });
           this.totalPages = Math.ceil(this.publications.length / 12);
+          // 最初の刊行物を注目刊行物として設定
+          if (this.publications.length > 0) {
+            this.featuredPublication = this.publications[0]
+          }
         }
       } catch (e) {
         // noop: 既存のプレースホルダーデータを維持
@@ -612,13 +628,14 @@ export default {
     formatPublicationItem(item) {
       const levelRaw = item.membership_level || item.membershipLevel
       const level = (levelRaw && String(levelRaw).toLowerCase()) || (item.members_only ? 'standard' : 'free')
+      const rawImage = item.cover_image_url || item.cover_image || '/img/image-1.png'
       return {
         id: item.id,
         title: item.title,
         publication_date: item.publication_date,
         year: new Date(item.publication_date).getFullYear(),
         category: item.category,
-        image: item.cover_image_url || item.cover_image || '/img/image-1.png',
+        image: resolveMediaUrl(rawImage),
         description: item.description,
         author: item.author,
         pages: item.pages,

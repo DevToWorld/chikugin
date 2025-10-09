@@ -91,7 +91,7 @@
       <div class="featured-publication" v-if="featuredPublication">
         <div class="featured-content" @click="goToPublicationDetail(featuredPublication.id)">
           <div class="featured-image" :class="{ blurred: isRestricted(featuredPublication) }">
-            <img src="/img/image-1.png" alt="一般向け刊行物" />
+            <img :src="featuredPublication.image || '/img/image-1.png'" :alt="featuredPublication.title || '一般向け刊行物'" />
           </div>
             <div class="featured-info">
             <div class="featured-meta">
@@ -239,6 +239,7 @@ import apiClient from '../services/apiClient.js';
 import apiCache from '@/services/apiCache'
 import mockServer from '@/mockServer';
 import { usePageText } from '@/composables/usePageText'
+import { resolveMediaUrl } from '@/utils/url.js'
 
 export default {
   name: "PublicationsPublicPage",
@@ -483,6 +484,10 @@ export default {
       const cachedList = apiCache.get('pub:list:public:last', 300)
       if (Array.isArray(cachedList) && cachedList.length) {
         this.publications = cachedList
+        // キャッシュから最初の刊行物を注目刊行物として設定
+        if (cachedList.length > 0) {
+          this.featuredPublication = cachedList[0]
+        }
         this.loading = false
       }
     } catch (e) { /* noop */ }
@@ -577,6 +582,10 @@ export default {
           const list = response.data.publications.map(item => this.formatPublicationItem(item));
           this.publications = list
           this.totalPages = response.data.pagination.total_pages;
+          // 最初の刊行物を注目刊行物として設定
+          if (list.length > 0) {
+            this.featuredPublication = list[0]
+          }
           // キャッシュ更新（初回描画高速化用）
           apiCache.set('pub:list:public:last', list)
           return
@@ -588,22 +597,29 @@ export default {
           if (allPublications && allPublications.length > 0) {
             // APIが取得できない場合でも、一般向け一覧は「全件表示」。
             // モックの会員レベルは item.membership_level もしくは membershipLevel に入る想定。
-            this.publications = allPublications.map(item => ({
-              id: item.id,
-              title: item.title,
-              image: item.cover_image || item.image_url || '/img/-----2-2-4.png',
-              description: item.description,
-              category: item.category || 'special',
-              publication_date: item.publication_date,
-              author: item.author || 'ちくぎん地域経済研究所',
-              pages: item.pages,
-              file_size: item.file_size,
-              download_count: item.download_count,
-              is_published: item.is_published,
-              // モックでも会員レベル情報を保持
-              membershipLevel: item.membership_level || item.membershipLevel || 'free'
-            }));
+            this.publications = allPublications.map(item => {
+              const rawImage = item.cover_image || item.image_url || '/img/-----2-2-4.png'
+              return {
+                id: item.id,
+                title: item.title,
+                image: resolveMediaUrl(rawImage),
+                description: item.description,
+                category: item.category || 'special',
+                publication_date: item.publication_date,
+                author: item.author || 'ちくぎん地域経済研究所',
+                pages: item.pages,
+                file_size: item.file_size,
+                download_count: item.download_count,
+                is_published: item.is_published,
+                // モックでも会員レベル情報を保持
+                membershipLevel: item.membership_level || item.membershipLevel || 'free'
+              }
+            });
             this.totalPages = Math.ceil(this.publications.length / 12);
+            // 最初の刊行物を注目刊行物として設定
+            if (this.publications.length > 0) {
+              this.featuredPublication = this.publications[0]
+            }
           }
         } catch (_) { /* noop */ }
       } catch (err) {
@@ -616,6 +632,7 @@ export default {
     },
     
     formatPublicationItem(item) {
+      const rawImage = item.cover_image_url || item.cover_image || '/img/image-1.png'
       return {
         id: item.id,
         title: item.title,
@@ -623,7 +640,7 @@ export default {
         publish_date: item.publication_date,
         publication_date: item.publication_date,
         category: item.category,
-        image: item.cover_image_url || item.cover_image || '/img/image-1.png',
+        image: resolveMediaUrl(rawImage),
         description: item.description,
         author: item.author,
         pages: item.pages,
