@@ -2711,10 +2711,10 @@ export default {
           }))
           .filter(h => h.year || h.date || h.body) : []
         const payload = { content: { history: hist }, is_published: true }
-        const res = await apiClient.adminUpdatePageContent('company-profile', payload)
+        const res = await apiClient.adminUpdatePageContent('company', payload)
         if (res && res.success) {
           alert('沿革を保存しました')
-          try { localStorage.removeItem('page_content_cache:company-profile') } catch(_) {}
+          try { localStorage.removeItem('page_content_cache:company') } catch(_) {}
         } else {
           alert((res && (res.error || res.message)) || '保存に失敗しました')
         }
@@ -3127,7 +3127,7 @@ export default {
             this.tlTexts = { ...(this.tlTexts || {}), ...(texts || {}) }
             this.tlHtmls = { ...(this.tlHtmls || {}), ...(htmls || {}) }
             if (!this.tlTexts.page_title) this.tlTexts.page_title = this.currentPage.title || ''
-          } else if (this.pageContentKey === 'company-profile') {
+          } else if (this.pageContentKey === 'company-profile' || this.pageContentKey === 'company') {
             this.companyTexts = { ...(this.companyTexts || {}), ...(texts || {}) }
             this.companyHtmls = { ...(this.companyHtmls || {}), ...(htmls || {}) }
             // history
@@ -3651,7 +3651,7 @@ export default {
         // 1) まずは保存済みの PageContent.content.staff を優先して読み込み
         let loaded = []
         try {
-          const res = await apiClient.adminGetPageContent('company-profile')
+          const res = await apiClient.adminGetPageContent('company')
           const page = (res && (res.page || res.data?.page)) || null
           let staff = page && page.content && Array.isArray(page.content.staff) ? page.content.staff : []
           if (staff.length) {
@@ -3727,7 +3727,7 @@ export default {
           })).filter(it => it.label || it.url) : []
         })).filter(r => r.fiscal_year || r.date_label || (r.items && r.items.length)) : []
         const payload = { content: { financial_reports: reports }, is_published: true }
-        const res = await apiClient.adminUpdatePageContent('company-profile', payload)
+        const res = await apiClient.adminUpdatePageContent('company', payload)
         if (res && res.success) {
           alert('決算報告を保存しました')
         } else {
@@ -3747,10 +3747,10 @@ export default {
           return
         }
         const payload = { content: { texts }, is_published: true }
-        const res = await apiClient.adminUpdatePageContent('company-profile', payload)
+        const res = await apiClient.adminUpdatePageContent('company', payload)
         if (res && res.success) {
           alert('所員テキストを保存しました')
-          try { localStorage.removeItem('page_content_cache:company-profile') } catch(_) {}
+          try { localStorage.removeItem('page_content_cache:company') } catch(_) {}
         } else {
           const msg = (res && (res.error || res.message)) || '保存に失敗しました（認証切れの可能性あり）'
           alert(msg)
@@ -3779,10 +3779,10 @@ export default {
         }).filter(Boolean) : []
 
         const payload = { content: { staff: visuals }, is_published: true }
-        const res = await apiClient.adminUpdatePageContent('company-profile', payload)
+        const res = await apiClient.adminUpdatePageContent('company', payload)
         if (res && res.success) {
           alert('所員の画像・順序を保存しました')
-          try { localStorage.removeItem('page_content_cache:company-profile') } catch(_) {}
+          try { localStorage.removeItem('page_content_cache:company') } catch(_) {}
         } else {
           const msg = (res && (res.error || res.message)) || '保存に失敗しました（認証切れの可能性あり）'
           alert(msg)
@@ -3804,10 +3804,10 @@ export default {
             payload.content.texts = { ...(payload.content.texts || {}), ...tx }
           }
         } catch(_) { /* noop */ }
-        const res = await apiClient.adminUpdatePageContent('company-profile', payload)
+        const res = await apiClient.adminUpdatePageContent('company', payload)
         if (res && res.success) {
           alert('所員（統合）を保存しました')
-          try { localStorage.removeItem('page_content_cache:company-profile') } catch(_) {}
+          try { localStorage.removeItem('page_content_cache:company') } catch(_) {}
         } else {
           const msg = (res && (res.error || res.message)) || '保存に失敗しました（認証切れの可能性あり）'
           alert(msg)
@@ -4200,7 +4200,7 @@ export default {
         } else if (foundKey === 'transaction-law') {
           this.tlTexts = { ...(this.tlTexts || {}), ...(texts || {}) }
           this.tlHtmls = { ...(this.tlHtmls || {}), ...(htmls || {}) }
-        } else if (foundKey === 'company-profile') {
+        } else if (foundKey === 'company-profile' || foundKey === 'company') {
           this.companyTexts = { ...(this.companyTexts || {}), ...(texts || {}) }
           this.companyHtmls = { ...(this.companyHtmls || {}), ...(htmls || {}) }
           this.companyHistory = Array.isArray(content?.history) ? content.history.map(h => ({
@@ -4268,7 +4268,7 @@ export default {
       } else if (key === 'transaction-law') {
         if (hasEntries(this.tlTexts)) patch.content.texts = { ...this.tlTexts }
         if (hasEntries(this.tlHtmls)) patch.content.htmls = { ...this.tlHtmls }
-      } else if (key === 'company-profile') {
+      } else if (key === 'company-profile' || key === 'company') {
         if (hasEntries(this.companyTexts)) patch.content.texts = { ...this.companyTexts }
         if (hasEntries(this.companyHtmls)) patch.content.htmls = { ...this.companyHtmls }
 
