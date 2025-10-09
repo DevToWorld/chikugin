@@ -96,6 +96,7 @@ import FixedSideButtons from "./FixedSideButtons.vue";
 import { frame132131753022Data } from "../data.js";
 import apiClient from '../services/apiClient.js';
 import { usePageText } from '@/composables/usePageText'
+import { resolveMediaUrl } from '@/utils/url.js'
 
 export default {
   name: "NewsDetailPage",
@@ -183,7 +184,7 @@ export default {
           title: notice.title,
           description: notice.summary || notice.content,
           type: 'notice',
-          image: notice.featured_image || ''
+          image: resolveMediaUrl(notice.featured_image || '')
         }
         this.originalItem = { content: notice.content }
         this.relatedNews = []
