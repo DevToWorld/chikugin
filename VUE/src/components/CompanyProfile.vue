@@ -7,7 +7,7 @@
       :title="pageTitle"
       :subtitle="pageSubtitle"
       :heroImage="media('hero_company_profile', '/img/Image_fx10.jpg')"
-      cmsPageKey="company-profile"
+      cmsPageKey="company"
       titleFieldKey="page_title"
       subtitleFieldKey="page_subtitle"
       mediaKey="hero_company_profile"
@@ -41,37 +41,37 @@
       <ul class="inpage-list">
         <li class="inpage-item">
           <a href="#philosophy" @click.prevent="scrollTo('philosophy')">
-            <CmsText pageKey="company-profile" fieldKey="nav_philosophy" tag="span" :fallback="'経営理念'" />
+            <CmsText pageKey="company" fieldKey="nav_philosophy" tag="span" :fallback="'経営理念'" />
           </a>
         </li>
         <li class="inpage-item">
           <a href="#message" @click.prevent="scrollTo('message')">
-            <CmsText pageKey="company-profile" fieldKey="nav_message" tag="span" :fallback="'ご挨拶'" />
+            <CmsText pageKey="company" fieldKey="nav_message" tag="span" :fallback="'ご挨拶'" />
           </a>
         </li>
         <li class="inpage-item">
           <a href="#profile" @click.prevent="scrollTo('profile')">
-            <CmsText pageKey="company-profile" fieldKey="nav_profile" tag="span" :fallback="'企業概要'" />
+            <CmsText pageKey="company" fieldKey="nav_profile" tag="span" :fallback="'企業概要'" />
           </a>
         </li>
         <li class="inpage-item">
           <a href="#history" @click.prevent="scrollTo('history')">
-            <CmsText pageKey="company-profile" fieldKey="nav_history" tag="span" :fallback="'沿革'" />
+            <CmsText pageKey="company" fieldKey="nav_history" tag="span" :fallback="'沿革'" />
           </a>
         </li>
         <li class="inpage-item">
           <a href="#staff" @click.prevent="scrollTo('staff')">
-            <CmsText pageKey="company-profile" fieldKey="nav_staff" tag="span" :fallback="'所員紹介'" />
+            <CmsText pageKey="company" fieldKey="nav_staff" tag="span" :fallback="'所員紹介'" />
           </a>
         </li>
         <li class="inpage-item">
           <a href="#financial-reports" @click.prevent="scrollTo('financial-reports')">
-            <CmsText pageKey="company-profile" fieldKey="nav_financial" tag="span" :fallback="'決算報告'" />
+            <CmsText pageKey="company" fieldKey="nav_financial" tag="span" :fallback="'決算報告'" />
           </a>
         </li>
         <li class="inpage-item">
           <a href="#access" @click.prevent="scrollTo('access')">
-            <CmsText pageKey="company-profile" fieldKey="nav_access" tag="span" :fallback="'アクセス'" />
+            <CmsText pageKey="company" fieldKey="nav_access" tag="span" :fallback="'アクセス'" />
           </a>
         </li>
       </ul>
@@ -84,12 +84,12 @@
     <section id="philosophy" class="philosophy-section" v-if="!isEditPreview">
       <div class="section-header">
         <h2 class="section-title">
-          <CmsText pageKey="company-profile" fieldKey="philosophy_title" tag="span" :fallback="'経営理念'" />
+          <CmsText pageKey="company" fieldKey="philosophy_title" tag="span" :fallback="'経営理念'" />
         </h2>
         <div class="section-divider">
           <div class="divider-line"></div>
           <span class="divider-text">
-            <CmsText pageKey="company-profile" fieldKey="philosophy_subtitle" tag="span" :fallback="'PHILOSOPHY'" />
+            <CmsText pageKey="company" fieldKey="philosophy_subtitle" tag="span" :fallback="'PHILOSOPHY'" />
           </span>
           <div class="divider-line"></div>
         </div>
@@ -98,7 +98,7 @@
         <img class="philosophy-image" :src="media('company_profile_philosophy', 'https://api.builder.io/api/v1/image/assets/TEMP/01501a28725d762f4b766643e9bcd235f2e43e2e?width=1340')" alt="Philosophy" />
         <div class="philosophy-text">
           <CmsText
-            pageKey="company-profile"
+            pageKey="company"
             fieldKey="mission_label"
             tag="div"
             class="mission-title"
@@ -106,14 +106,14 @@
           />
           <div class="mission-content">
             <CmsText
-              pageKey="company-profile"
+              pageKey="company"
               fieldKey="mission_title"
               tag="h3"
               class="mission-heading"
               :fallback="'産官学金のネットワーク活用による地域貢献'"
             />
             <CmsText
-              pageKey="company-profile"
+              pageKey="company"
               fieldKey="mission_body"
               tag="div"
               type="html"
@@ -129,12 +129,12 @@
     <section id="message" class="message-section" v-if="!isEditPreview">
       <div class="section-header">
         <h2 class="section-title">
-          <CmsText pageKey="company-profile" fieldKey="message_title" tag="span" :fallback="'ご挨拶'" />
+          <CmsText pageKey="company" fieldKey="message_title" tag="span" :fallback="'ご挨拶'" />
         </h2>
         <div class="section-divider">
           <div class="divider-line"></div>
           <span class="divider-text">
-            <CmsText pageKey="company-profile" fieldKey="message_subtitle" tag="span" :fallback="'MESSAGE'" />
+            <CmsText pageKey="company" fieldKey="message_subtitle" tag="span" :fallback="'MESSAGE'" />
           </span>
           <div class="divider-line"></div>
         </div>
@@ -142,11 +142,11 @@
       <div class="message-content">
         <div class="message-text">
           <div class="message-title">
-            <CmsText pageKey="company-profile" fieldKey="message_label" tag="div" :fallback="'MESSAGE'" />
+            <CmsText pageKey="company" fieldKey="message_label" tag="div" :fallback="'MESSAGE'" />
           </div>
           <div class="message-body">
             <CmsText
-              pageKey="company-profile"
+              pageKey="company"
               fieldKey="message_body"
               tag="div"
               type="html"
@@ -154,7 +154,7 @@
             />
           </div>
           <div class="message-signature">
-            <CmsText pageKey="company-profile" fieldKey="message_signature" tag="div" type="html" :fallback="'株式会社ちくぎん地域経済研究所<br>代表取締役社長 空閑 重信 願い申し上げます。'" />
+            <CmsText pageKey="company" fieldKey="message_signature" tag="div" type="html" :fallback="'株式会社ちくぎん地域経済研究所<br>代表取締役社長 空閑 重信 願い申し上げます。'" />
           </div>
         </div>
         <img class="message-image" :src="media('company_profile_message', 'https://api.builder.io/api/v1/image/assets/TEMP/20aa75cfa1be4c2096a1f47bf126cf240173b231?width=1340')" alt="Message" />
@@ -168,12 +168,12 @@
     <section id="profile" class="company-profile-section" v-if="!isEditPreview">
       <div class="section-header">
         <h2 class="section-title">
-          <CmsText pageKey="company-profile" fieldKey="profile_title" tag="span" :fallback="'会社概要'" />
+          <CmsText pageKey="company" fieldKey="profile_title" tag="span" :fallback="'会社概要'" />
         </h2>
         <div class="section-divider">
           <div class="divider-line"></div>
           <span class="divider-text">
-            <CmsText pageKey="company-profile" fieldKey="profile_subtitle" tag="span" :fallback="'COMPANY PROFILE'" />
+            <CmsText pageKey="company" fieldKey="profile_subtitle" tag="span" :fallback="'COMPANY PROFILE'" />
           </span>
           <div class="divider-line"></div>
         </div>
@@ -181,58 +181,58 @@
       <div class="profile-table">
         <div class="profile-row">
           <div class="profile-label">
-            <CmsText pageKey="company-profile" fieldKey="profile_company_name_label" tag="span" :fallback="'会社名'" />
+            <CmsText pageKey="company" fieldKey="profile_company_name_label" tag="span" :fallback="'会社名'" />
           </div>
           <div class="profile-value">
-            <CmsText pageKey="company-profile" fieldKey="profile_company_name_value" tag="span" :fallback="'株式会社 ちくぎん地域経済研究所'" />
+            <CmsText pageKey="company" fieldKey="profile_company_name_value" tag="span" :fallback="'株式会社 ちくぎん地域経済研究所'" />
           </div>
         </div>
         <div class="profile-row">
           <div class="profile-label">
-            <CmsText pageKey="company-profile" fieldKey="profile_established_label" tag="span" :fallback="'設立'" />
+            <CmsText pageKey="company" fieldKey="profile_established_label" tag="span" :fallback="'設立'" />
           </div>
           <div class="profile-value">
-            <CmsText pageKey="company-profile" fieldKey="profile_established_value" tag="span" :fallback="'平成23年7月1日'" />
+            <CmsText pageKey="company" fieldKey="profile_established_value" tag="span" :fallback="'平成23年7月1日'" />
           </div>
         </div>
         <div class="profile-row">
           <div class="profile-label">
-            <CmsText pageKey="company-profile" fieldKey="profile_address_label" tag="span" :fallback="'住所'" />
+            <CmsText pageKey="company" fieldKey="profile_address_label" tag="span" :fallback="'住所'" />
           </div>
           <div class="profile-value">
-            <CmsText pageKey="company-profile" fieldKey="profile_address_value" tag="div" type="html" :fallback="'〒839-0864<br>福岡県久留米市百年公園1番1号 久留米リサーチセンタービル6階'" />
+            <CmsText pageKey="company" fieldKey="profile_address_value" tag="div" type="html" :fallback="'〒839-0864<br>福岡県久留米市百年公園1番1号 久留米リサーチセンタービル6階'" />
           </div>
         </div>
         <div class="profile-row">
           <div class="profile-label">
-            <CmsText pageKey="company-profile" fieldKey="profile_representative_label" tag="span" :fallback="'代表者'" />
+            <CmsText pageKey="company" fieldKey="profile_representative_label" tag="span" :fallback="'代表者'" />
           </div>
           <div class="profile-value">
-            <CmsText pageKey="company-profile" fieldKey="profile_representative_value" tag="span" :fallback="'代表取締役社長　空閑 重信'" />
+            <CmsText pageKey="company" fieldKey="profile_representative_value" tag="span" :fallback="'代表取締役社長　空閑 重信'" />
           </div>
         </div>
         <div class="profile-row">
           <div class="profile-label">
-            <CmsText pageKey="company-profile" fieldKey="profile_capital_label" tag="span" :fallback="'資本金'" />
+            <CmsText pageKey="company" fieldKey="profile_capital_label" tag="span" :fallback="'資本金'" />
           </div>
           <div class="profile-value">
-            <CmsText pageKey="company-profile" fieldKey="profile_capital_value" tag="span" :fallback="'3,000万円'" />
+            <CmsText pageKey="company" fieldKey="profile_capital_value" tag="span" :fallback="'3,000万円'" />
           </div>
         </div>
         <div class="profile-row">
           <div class="profile-label">
-            <CmsText pageKey="company-profile" fieldKey="profile_shareholders_label" tag="span" :fallback="'株主'" />
+            <CmsText pageKey="company" fieldKey="profile_shareholders_label" tag="span" :fallback="'株主'" />
           </div>
           <div class="profile-value">
-            <CmsText pageKey="company-profile" fieldKey="profile_shareholders_value" tag="span" :fallback="'筑邦銀行　および筑邦銀行グループ会社 （ちくぎんリース(株)、昭光(株)、筑邦信用保証(株)）'" />
+            <CmsText pageKey="company" fieldKey="profile_shareholders_value" tag="span" :fallback="'筑邦銀行　および筑邦銀行グループ会社 （ちくぎんリース(株)、昭光(株)、筑邦信用保証(株)）'" />
           </div>
         </div>
         <div class="profile-row">
           <div class="profile-label">
-            <CmsText pageKey="company-profile" fieldKey="profile_organization_label" tag="span" :fallback="'組織体制'" />
+            <CmsText pageKey="company" fieldKey="profile_organization_label" tag="span" :fallback="'組織体制'" />
           </div>
           <div class="profile-value">
-            <CmsText pageKey="company-profile" fieldKey="profile_organization_value" tag="span" :fallback="'企画部、調査部'" />
+            <CmsText pageKey="company" fieldKey="profile_organization_value" tag="span" :fallback="'企画部、調査部'" />
           </div>
         </div>
       </div>
@@ -242,12 +242,12 @@
     <section id="history" class="history-section" :key="historyVersion" v-if="pageReady">
       <div class="section-header">
         <h2 class="section-title">
-          <CmsText pageKey="company-profile" fieldKey="history_title" tag="span" :fallback="'沿革'" />
+          <CmsText pageKey="company" fieldKey="history_title" tag="span" :fallback="'沿革'" />
         </h2>
         <div class="section-divider">
           <div class="divider-line"></div>
           <span class="divider-text">
-            <CmsText pageKey="company-profile" fieldKey="history_subtitle" tag="span" :fallback="'HISTORY'" />
+            <CmsText pageKey="company" fieldKey="history_subtitle" tag="span" :fallback="'HISTORY'" />
           </span>
           <div class="divider-line"></div>
         </div>
@@ -272,12 +272,12 @@
     <section id="staff" class="staff-section" v-if="pageReady && staffCount" :key="staffVersion">
       <div class="section-header">
         <h2 class="section-title">
-          <CmsText pageKey="company-profile" fieldKey="staff_title" tag="span" :fallback="'所員紹介'" />
+          <CmsText pageKey="company" fieldKey="staff_title" tag="span" :fallback="'所員紹介'" />
         </h2>
         <div class="section-divider">
           <div class="divider-line"></div>
           <span class="divider-text">
-            <CmsText pageKey="company-profile" fieldKey="staff_subtitle" tag="span" :fallback="'MEMBER'" />
+            <CmsText pageKey="company" fieldKey="staff_subtitle" tag="span" :fallback="'MEMBER'" />
           </span>
           <div class="divider-line"></div>
         </div>
@@ -334,12 +334,12 @@
     <section id="financial-reports" class="financial-reports-section">
       <div class="section-header">
         <h2 class="section-title">
-          <CmsText pageKey="company-profile" fieldKey="financial_reports_title" tag="span" :fallback="'決算報告'" />
+          <CmsText pageKey="company" fieldKey="financial_reports_title" tag="span" :fallback="'決算報告'" />
         </h2>
         <div class="section-divider">
           <div class="divider-line"></div>
           <span class="divider-text">
-            <CmsText pageKey="company-profile" fieldKey="financial_reports_subtitle" tag="span" :fallback="'FINANCIAL REPORTS'" />
+            <CmsText pageKey="company" fieldKey="financial_reports_subtitle" tag="span" :fallback="'FINANCIAL REPORTS'" />
           </span>
           <div class="divider-line"></div>
         </div>

@@ -115,9 +115,20 @@ export default {
           const cached = (raw.trim().startsWith('{') || raw.trim().startsWith('[')) ? JSON.parse(raw) : null
           const images = cached?.content?.images || null
           const v = images ? images.hero : null
-          if (typeof v === 'string' && v) this.cachedHeroUrl = v
+          if (typeof v === 'string' && v) {
+            let url = v
+            // Fix paths that start with /pages/ to /storage/pages/
+            if (url.startsWith('/pages/')) {
+              url = '/storage' + url
+            }
+            this.cachedHeroUrl = url
+          }
           else if (v && typeof v === 'object' && v.url) {
             let url = String(v.url)
+            // Fix paths that start with /pages/ to /storage/pages/
+            if (url.startsWith('/pages/')) {
+              url = '/storage' + url
+            }
             try {
               if (url.startsWith('/storage/') && v.uploaded_at) {
                 const ver = (Date.parse(v.uploaded_at) || null)
@@ -265,10 +276,21 @@ export default {
       const val = images?.[key]
       if (!val) return ''
       // String value (already a URL)
-      if (typeof val === 'string') return resolveMediaUrl(val)
+      if (typeof val === 'string') {
+        let url = val
+        // Fix paths that start with /pages/ to /storage/pages/
+        if (url.startsWith('/pages/')) {
+          url = '/storage' + url
+        }
+        return resolveMediaUrl(url)
+      }
       // Object with metadata
       if (typeof val === 'object' && val.url) {
         let url = String(val.url)
+        // Fix paths that start with /pages/ to /storage/pages/
+        if (url.startsWith('/pages/')) {
+          url = '/storage' + url
+        }
         try {
           if (url.startsWith('/storage/') && val.uploaded_at) {
             // Cache-bust storage URLs only when uploaded_at is present
