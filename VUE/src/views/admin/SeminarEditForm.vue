@@ -158,8 +158,8 @@
                 <label for="featured_image" class="form-label">
                   セミナー画像
                 </label>
-                <div v-if="formData.featured_image" class="image-preview-container">
-                  <img :src="resolvedFeaturedImage" alt="セミナー画像" class="image-preview" />
+                <div v-if="formData.featured_image && formData.featured_image !== ''" class="image-preview-container">
+                  <img :src="resolvedFeaturedImage" alt="セミナー画像" class="image-preview" @error="handleImageError" />
                   <button type="button" @click="removeImage" class="remove-image-btn">画像を削除</button>
                 </div>
                 <div class="image-upload-container">
@@ -172,7 +172,7 @@
                     ref="imageInput"
                   />
                   <label for="featured_image" class="file-input-label">
-                    画像を選択
+                    {{ formData.featured_image ? '画像を変更' : '画像を選択' }}
                   </label>
                 </div>
                 <p class="help-text">推奨サイズ: 800×450px（16:9）、最大5MB</p>
@@ -320,7 +320,34 @@ export default {
         // 管理APIから取得（draft等でも取得可能）
         const res = await apiClient.get(`/api/admin/seminars/${this.seminarId}`)
         if (res.success && res.data && res.data.seminar) {
-          this.formData = res.data.seminar
+          const seminar = res.data.seminar
+          
+          // Format date for input[type="date"] (YYYY-MM-DD format)
+          if (seminar.date) {
+            seminar.date = seminar.date.split('T')[0]
+          }
+          
+          // Format time fields to HH:mm format
+          if (seminar.start_time) {
+            const time = seminar.start_time.split('T')[1] || seminar.start_time
+            seminar.start_time = time.substring(0, 5)
+          }
+          if (seminar.end_time) {
+            const time = seminar.end_time.split('T')[1] || seminar.end_time
+            seminar.end_time = time.substring(0, 5)
+          }
+          
+          // Preserve featured_image (not featured_image_url which is just for display)
+          // If featured_image is null/empty but we have a real image saved, keep it
+          this.formData = {
+            ...seminar,
+            featured_image: seminar.featured_image || ''
+          }
+          
+          console.log('Loaded seminar data:', { 
+            featured_image: seminar.featured_image, 
+            featured_image_url: seminar.featured_image_url 
+          })
         } else {
           throw new Error('Seminar not found')
         }
@@ -456,6 +483,10 @@ export default {
       if (this.$refs.imageInput) {
         this.$refs.imageInput.value = ''
       }
+    },
+    handleImageError(event) {
+      console.error('Failed to load image:', this.formData.featured_image)
+      console.error('Resolved URL:', this.resolvedFeaturedImage)
     }
   }
 }
@@ -720,12 +751,14 @@ export default {
 }
 
 .image-preview {
-  max-width: 100%;
-  max-height: 300px;
+  max-width: 37.5%;
+  max-height: 225px;
+  object-fit: contain;
   border-radius: 8px;
   border: 2px solid #e5e5e5;
   display: block;
   margin-bottom: 12px;
+  background-color: #f9fafb;
 }
 
 .remove-image-btn {
