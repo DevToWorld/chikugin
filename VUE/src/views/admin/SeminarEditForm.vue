@@ -159,7 +159,7 @@
                   セミナー画像
                 </label>
                 <div v-if="formData.featured_image" class="image-preview-container">
-                  <img :src="formData.featured_image" alt="セミナー画像" class="image-preview" />
+                  <img :src="resolvedFeaturedImage" alt="セミナー画像" class="image-preview" />
                   <button type="button" @click="removeImage" class="remove-image-btn">画像を削除</button>
                 </div>
                 <div class="image-upload-container">
@@ -257,6 +257,7 @@
 <script>
 import AdminLayout from './AdminLayout.vue'
 import apiClient from '../../services/apiClient'
+import { resolveMediaUrl } from '@/utils/url.js'
 
 export default {
   name: 'SeminarEditForm',
@@ -291,6 +292,10 @@ export default {
     },
     seminarId() {
       return this.$route.params.id || this.$route.query.id
+    },
+    resolvedFeaturedImage() {
+      if (!this.formData.featured_image) return ''
+      return resolveMediaUrl(this.formData.featured_image)
     }
   },
   async mounted() {

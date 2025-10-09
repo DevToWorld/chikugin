@@ -8,6 +8,7 @@
       :title="pageTitle"
       :subtitle="pageSubtitle"
       heroImage="/img/Image_fx6.jpg"
+      cmsPageKey="seminars-current"
       mediaKey="hero_seminars_current"
     />
 
@@ -169,6 +170,7 @@ import { frame132131753022Data } from "../data";
 import apiClient from '@/services/apiClient.js'
 import MembershipBadge from './MembershipBadge.vue'
 import { usePageText } from '@/composables/usePageText'
+import { resolveMediaUrl } from '@/utils/url.js'
 
 export default {
   name: "CurrentSeminarsPage",
@@ -238,7 +240,7 @@ export default {
             .sort((a, b) => toTs(b) - toTs(a))
           this.seminarsFromServer = currentSeminars.map(s => ({
             id: s.id,
-            image: s.featured_image_url || s.featured_image || '/img/image-1.png',
+            image: resolveMediaUrl(s.featured_image_url || s.featured_image || '/img/image-1.png'),
             reservationPeriod: `${s.start_time || '10:00'}〜${s.end_time || '12:00'}`,
             date: this.formatDate(s.date),
             title: s.title,

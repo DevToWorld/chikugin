@@ -8,12 +8,28 @@ export function resolveMediaUrl(input) {
   const url = String(input)
   const lower = url.toLowerCase()
 
-  // Absolute URLs and protocol-relative
+  const apiBaseUrl = getApiBaseUrl()
+
+  // Replace localhost URLs with actual API host
+  if (lower.startsWith('http://localhost') || lower.startsWith('https://localhost') || 
+      lower.startsWith('http://127.0.0.1') || lower.startsWith('https://127.0.0.1')) {
+    // Extract the path after the domain
+    try {
+      const urlObj = new URL(url)
+      return `${apiBaseUrl}${urlObj.pathname}${urlObj.search}${urlObj.hash}`
+    } catch (e) {
+      // If URL parsing fails, try to extract path manually
+      const pathMatch = url.match(/https?:\/\/[^\/]+(\/.*)/);
+      if (pathMatch) {
+        return `${apiBaseUrl}${pathMatch[1]}`
+      }
+    }
+  }
+
+  // Other absolute URLs and protocol-relative - return as-is
   if (lower.startsWith('http://') || lower.startsWith('https://') || url.startsWith('//')) {
     return url
   }
-
-  const apiBaseUrl = getApiBaseUrl()
 
   // Storage URLs - prepend API host
   if (url.startsWith('/storage/')) {

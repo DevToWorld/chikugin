@@ -229,6 +229,10 @@ export default {
       if (typeof entry === 'string') return resolveMediaUrl(entry)
       if (typeof entry === 'object' && entry.url) {
         let url = entry.url
+        // Fix paths that start with /pages/ to /storage/pages/
+        if (url.startsWith('/pages/')) {
+          url = '/storage' + url
+        }
         try {
           if (url.startsWith('/storage/') && entry.uploaded_at) {
             const ver = Date.parse(entry.uploaded_at) || null

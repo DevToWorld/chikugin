@@ -36,6 +36,8 @@
 <script>
 import Frame13213176122 from "./Frame13213176122";
 import CmsText from '@/components/CmsText.vue'
+import { resolveMediaUrl } from '@/utils/url.js'
+import { usePageText } from '@/composables/usePageText'
 export default {
   name: "ContactSection",
   components: {
@@ -59,7 +61,34 @@ export default {
       default: ''
     }
   },
+  data() {
+    return {
+      _pageText: null,
+      _pageMedia: null,
+      _media: null,
+      imageVersion: 0
+    }
+  },
   async mounted() {
+    // Load page content for images
+    if (this.cmsKey) {
+      try {
+        this._pageText = usePageText(this.cmsKey)
+        await this._pageText.load()
+        // Watch for page content changes
+        try {
+          this.$watch(() => {
+            const imgs = this._pageText?.page?.value?.content?.images
+            if (!imgs) return ''
+            try { return JSON.stringify(imgs) } catch(_) { return Object.keys(imgs).join('|') }
+          }, () => {
+            this.imageVersion++
+          })
+        } catch(_) {}
+      } catch(e) { /* noop */ }
+    }
+    
+    // Load media registry
     if (this.mediaKey) {
       try {
         const mod = await import('@/composables/usePageMedia')
@@ -74,12 +103,12 @@ export default {
             const val = imgs && (imgs.value !== undefined ? imgs.value : imgs)
             try { return val ? JSON.stringify(val) : '' } catch(_) { return val ? Object.keys(val).join('|') : '' }
           }
-          this.$watch(readVersion, () => { this.$forceUpdate() })
+          this.$watch(readVersion, () => { this.imageVersion++ })
           const readLoaded = () => {
             const ld = this._media && this._media.loaded
             return ld && (ld.value !== undefined ? ld.value : ld)
           }
-          this.$watch(readLoaded, () => { this.$forceUpdate() })
+          this.$watch(readLoaded, () => { this.imageVersion++ })
         } catch (_) { /* noop */ }
       } catch (e) { /* noop */ }
     }
@@ -90,19 +119,54 @@ export default {
       return this.cmsPageKey || 'contact'
     },
     resolvedBg() {
+      void this.imageVersion // trigger reactivity
+      
       try {
+        // 1) Priority: Page-managed image (PageContent.content.images.contact_bg)
+        const imgs = this._pageText?.page?.value?.content?.images
+        if (imgs && typeof imgs === 'object') {
+          // Try contact_bg, contact_section_bg, or the mediaKey
+          const keys = ['contact_bg', 'contact_section_bg', this.mediaKey]
+          for (const key of keys) {
+            if (Object.prototype.hasOwnProperty.call(imgs, key)) {
+              const v = imgs[key]
+              let url = (v && typeof v === 'object') ? (v.url || '') : (typeof v === 'string' ? v : '')
+              // Fix paths that start with /pages/ to /storage/pages/
+              if (url.startsWith('/pages/')) {
+                url = '/storage' + url
+              }
+              try {
+                const meta = (v && typeof v === 'object') ? v : null
+                const ver = meta && meta.uploaded_at ? (Date.parse(meta.uploaded_at) || null) : null
+                if (ver !== null && typeof url === 'string' && url.startsWith('/storage/')) {
+                  url += (url.includes('?') ? '&' : '?') + '_t=' + encodeURIComponent(String(ver))
+                }
+              } catch(_) {}
+              if (typeof url === 'string' && url.length) return resolveMediaUrl(url)
+            }
+          }
+        }
+        
+        // 2) Fallback: Media registry
         if (this._pageMedia) {
-          // Use slot=mediaKey with default=mediaKey (per-page mapping allows override)
-          const v = this._pageMedia.getResponsiveSlot(this.mediaKey, this.mediaKey, this.backgroundImage)
-          if (v) return v
+          const v = this._pageMedia.getResponsiveSlot(this.mediaKey, this.mediaKey, null)
+          if (v) return resolveMediaUrl(v)
         }
         const key = this.mediaKey
         if (key && this._media) {
-          if (this._media.getResponsiveImage) return this._media.getResponsiveImage(key, this.backgroundImage) || this.backgroundImage
-          if (this._media.getImage) return this._media.getImage(key, this.backgroundImage) || this.backgroundImage
+          if (this._media.getResponsiveImage) {
+            const img = this._media.getResponsiveImage(key, null)
+            if (img) return resolveMediaUrl(img)
+          }
+          if (this._media.getImage) {
+            const img = this._media.getImage(key, null)
+            if (img) return resolveMediaUrl(img)
+          }
         }
       } catch(_) {}
-      return this.backgroundImage
+      
+      // 3) Final fallback: static image
+      return resolveMediaUrl(this.backgroundImage)
     },
     bgStyle() {
       return { backgroundImage: `url('${this.resolvedBg}')` }

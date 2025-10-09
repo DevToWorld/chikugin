@@ -6,7 +6,7 @@
     <HeroSection
       :title="pageTitle"
       :subtitle="pageSubtitle"
-      cms-page-key="about"
+      cmsPageKey="aboutus"
       heroImage="/img/hero-image.png"
     />
 

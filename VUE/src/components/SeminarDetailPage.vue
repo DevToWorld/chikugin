@@ -7,6 +7,7 @@
       title="セミナー詳細"
       subtitle="seminar"
       heroImage="/img/Image_fx6.jpg"
+      cmsPageKey="seminars"
     />
 
     <!-- Breadcrumbs -->
@@ -60,10 +61,10 @@
              </div>
            </div>
            
-           <div v-if="!isPastSeminar" class="seminar-image" :class="{ blurred: shouldBlur }">
+           <div class="seminar-image" :class="{ blurred: shouldBlur && !isPastSeminar }">
              <img :src="seminar.image || '/img/image-1.png'" :alt="seminar.title" />
              <MembershipBadge 
-               v-if="seminar.membershipRequirement && seminar.membershipRequirement !== 'free'" 
+               v-if="!isPastSeminar && seminar.membershipRequirement && seminar.membershipRequirement !== 'free'" 
                :level="seminar.membershipRequirement" 
                class="detail-badge"
              />
@@ -168,6 +169,7 @@ import { frame132131753022Data } from "../data";
 import apiClient from '../services/apiClient.js';
 import mockServer from '@/mockServer';
 import MembershipBadge from './MembershipBadge.vue';
+import { resolveMediaUrl } from '@/utils/url.js';
 
 export default {
   name: "SeminarDetailPage",
@@ -320,7 +322,7 @@ export default {
               capacity: s.capacity ? `${s.capacity}名` : '',
               fee: payload.formatted_fee || s.formatted_fee || (s.fee == 0 ? '無料' : (s.fee != null ? `${s.fee}円` : '')),
               status: (s.status === 'scheduled' || s.status === 'ongoing') ? 'current' : s.status,
-              image: s.featured_image || '/img/image-1.png',
+              image: resolveMediaUrl(s.featured_image || '/img/image-1.png'),
               instructor: s.instructor || 'ちくぎん地域経済研究所',
               notes: s.notes,
               application_deadline: s.application_deadline,
@@ -374,7 +376,7 @@ export default {
         instructor: seminar.instructor || 'ちくぎん地域経済研究所',
         venue: seminar.location,
         target: this.formatTarget(seminar.membership_requirement),
-        image: seminar.featured_image || '/img/image-1.png',
+        image: resolveMediaUrl(seminar.featured_image || '/img/image-1.png'),
         start_time: seminar.start_time,
         end_time: seminar.end_time,
         membershipRequirement: seminar.membership_requirement || 'free',

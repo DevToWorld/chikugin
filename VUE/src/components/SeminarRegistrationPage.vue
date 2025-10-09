@@ -7,6 +7,7 @@
       :title="pageTitle"
       :subtitle="pageSubtitle"
       heroImage="/img/Image_fx2.jpg"
+      cmsPageKey="seminars"
       mediaKey="hero_seminar"
     />
 

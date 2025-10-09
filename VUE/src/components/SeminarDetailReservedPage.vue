@@ -7,6 +7,7 @@
       title="セミナー詳細"
       subtitle="seminar"
       heroImage="/img/Image_fx6.jpg"
+      cmsPageKey="seminars"
     />
 
     <!-- Breadcrumbs -->

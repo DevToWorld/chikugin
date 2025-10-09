@@ -275,6 +275,7 @@ export default {
         file_size: null,
         download_count: 0,
         is_published: false,
+        is_downloadable: true,
         membership_level: 'free'
       },
       coverImageFile: null,

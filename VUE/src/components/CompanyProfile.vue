@@ -162,7 +162,7 @@
     </section>
 
     <!-- Contact CTA Section -->
-    <ContactSection cms-page-key="company-profile" v-if="!isEditPreview" />
+    <ContactSection cms-page-key="company" v-if="!isEditPreview" />
 
     <!-- Company Profile Section -->
     <section id="profile" class="company-profile-section" v-if="!isEditPreview">
@@ -426,7 +426,7 @@ export default {
   },
   data() {
     return {
-      pageKey: 'company-profile',
+      pageKey: 'company',
       pageLoaded: false,
       stateHistory: [],
       stateStaff: [],
@@ -949,6 +949,10 @@ export default {
           const v0 = imgs0[key]
           let u0 = (v0 && typeof v0 === 'object') ? (v0.url || '') : (typeof v0 === 'string' ? v0 : '')
           if (typeof u0 === 'string' && u0) {
+            // Fix paths that start with /pages/ to /storage/pages/
+            if (u0.startsWith('/pages/')) {
+              u0 = '/storage' + u0
+            }
             try {
               const ver = (v0 && typeof v0 === 'object' && v0.uploaded_at) ? (Date.parse(v0.uploaded_at) || null) : null
               if (ver !== null && u0.startsWith('/storage/')) {
@@ -965,6 +969,10 @@ export default {
         if (imgs && Object.prototype.hasOwnProperty.call(imgs, key)) {
           const v = imgs[key]
           let url = (v && typeof v === 'object') ? (v.url || '') : (typeof v === 'string' ? v : '')
+          // Fix paths that start with /pages/ to /storage/pages/
+          if (url.startsWith('/pages/')) {
+            url = '/storage' + url
+          }
           try {
             const meta = (v && typeof v === 'object') ? v : null
             const ver = meta && meta.uploaded_at ? (Date.parse(meta.uploaded_at) || null) : null

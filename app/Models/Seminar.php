@@ -197,12 +197,25 @@ class Seminar extends Model
         if (!$path) {
             return '/img/image-1.png';
         }
+        
+        // すでに絶対URL（localhost含む）の場合、パスのみ抽出
         if (str_starts_with($path, 'http://') || str_starts_with($path, 'https://')) {
-            return $path;
+            try {
+                $parsedUrl = parse_url($path);
+                if (isset($parsedUrl['path'])) {
+                    $path = $parsedUrl['path'];
+                }
+            } catch (\Throwable $e) {
+                // パース失敗時は元のパスを正規化
+            }
         }
+        
+        // ルート相対（/storage/... など）はそのまま
         if (str_starts_with($path, '/')) {
             return $path;
         }
+        
+        // 正規化
         $normalized = ltrim($path, '/');
         if (str_starts_with($normalized, 'storage/')) {
             $normalized = substr($normalized, 8);
@@ -210,14 +223,9 @@ class Seminar extends Model
         if (str_starts_with($normalized, 'public/')) {
             $normalized = substr($normalized, 7);
         }
-        try {
-            if (Storage::disk('public')->exists($normalized)) {
-                return asset('storage/' . $normalized);
-            }
-        } catch (\Throwable $e) {
-            // ignore
-        }
-        return '/img/image-1.png';
+        
+        // ストレージパスとして返す（asset()ではなく、ルート相対パス）
+        return '/storage/' . $normalized;
     }
 
     // ヘルパーメソッド

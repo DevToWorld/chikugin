@@ -197,19 +197,33 @@ export default {
   },
   computed: {
     resolvedImage() {
+      let imageUrl = ''
+      
       // 0) Immediate local cache (pre-mount hydration) to suppress initial static flicker
-      try { if (this.cachedHeroUrl && typeof this.cachedHeroUrl === 'string') return this.cachedHeroUrl } catch(_) {}
+      try { 
+        if (this.cachedHeroUrl && typeof this.cachedHeroUrl === 'string') {
+          imageUrl = this.cachedHeroUrl
+          return resolveMediaUrl(imageUrl)
+        }
+      } catch(_) {}
+      
       // 1) Prefer page-managed hero image (PageContent.content.images.hero)
       try {
         const pageHero = this.pageHero && this.pageHero()
-        if (typeof pageHero === 'string' && pageHero.length) return pageHero
+        if (typeof pageHero === 'string' && pageHero.length) {
+          imageUrl = pageHero
+          return resolveMediaUrl(imageUrl)
+        }
       } catch (_) {}
 
       // 2) Fallback to media registry with per-page mapping if available
       try {
         if (this._pageMedia && (this.cmsPageKey || '').length > 0) {
           const v = this._pageMedia.getResponsiveSlot('hero', this.mediaKey || '', this.heroImage)
-          if (v) return v
+          if (v) {
+            imageUrl = v
+            return resolveMediaUrl(imageUrl)
+          }
         }
       } catch (_) {}
 
@@ -218,15 +232,18 @@ export default {
       if (key && this._media) {
         if (this._media.getResponsiveImage) {
           const v = this._media.getResponsiveImage(key, this.heroImage)
-          return v || this.heroImage
+          imageUrl = v || this.heroImage
+          return resolveMediaUrl(imageUrl)
         }
         if (this._media.getImage) {
           const v = this._media.getImage(key, this.heroImage)
-          return v || this.heroImage
+          imageUrl = v || this.heroImage
+          return resolveMediaUrl(imageUrl)
         }
       }
       // 4) Static fallback
-      return this.heroImage
+      imageUrl = this.heroImage
+      return resolveMediaUrl(imageUrl)
     },
     heroStyle() {
       return {
