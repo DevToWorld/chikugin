@@ -100,9 +100,11 @@ export default {
       this.$router.push(`/publications/${this.publication.id}`)
     },
     downloadPDF() {
-      // PDF ダウンロード処理
+      // PDF ダウンロード処理（API hostを付与）
       if (this.publication.file_url) {
-        window.open(this.publication.file_url, '_blank')
+        const { resolveMediaUrl } = require('@/utils/url.js')
+        const downloadUrl = resolveMediaUrl(this.publication.file_url)
+        window.open(downloadUrl, '_blank')
       }
     },
     handleRestrictedClick() {

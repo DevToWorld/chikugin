@@ -137,7 +137,7 @@ class EconomicReportManagementController extends Controller
                 'is_published' => 'boolean',
                 'sort_order' => 'nullable|integer',
                 'cover_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-                'file' => 'nullable|file|mimes:pdf,doc,docx|max:10240'
+                'file' => 'required|file|mimes:pdf,doc,docx|max:10240'
             ]);
 
             if ($validator->fails()) {
@@ -189,7 +189,10 @@ class EconomicReportManagementController extends Controller
             // ファイルのアップロード
             if ($request->hasFile('file')) {
                 $file = $request->file('file');
-                $fileName = Str::slug($data['title']) . '_' . time() . '.' . $file->getClientOriginalExtension();
+                // 元のファイル名を保存
+                $data['file_name'] = $file->getClientOriginalName();
+                // ハッシュ化されたファイル名で保存（セキュリティ向上）
+                $fileName = Str::random(40) . '.' . $file->getClientOriginalExtension();
                 $filePath = $file->storeAs('economic-reports/files', $fileName, 'public');
                 $data['file_url'] = $filePath;
                 // バイト数を専用カラムに保存（10MB超でも安全）
@@ -294,7 +297,10 @@ class EconomicReportManagementController extends Controller
                 }
                 
                 $file = $request->file('file');
-                $fileName = Str::slug($data['title']) . '_' . time() . '.' . $file->getClientOriginalExtension();
+                // 元のファイル名を保存
+                $data['file_name'] = $file->getClientOriginalName();
+                // ハッシュ化されたファイル名で保存（セキュリティ向上）
+                $fileName = Str::random(40) . '.' . $file->getClientOriginalExtension();
                 $filePath = $file->storeAs('economic-reports/files', $fileName, 'public');
                 $data['file_url'] = $filePath;
                 $data['file_size_bytes'] = $file->getSize();

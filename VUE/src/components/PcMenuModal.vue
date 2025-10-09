@@ -51,7 +51,7 @@
               <span class="dropdown-icon">+</span>
               <div class="dropdown-menu" v-show="activeDropdown === 'info'" @mouseenter="showDropdown('info')" @mouseleave="hideDropdown('info')">
                 <div class="dropdown-item" @click="navigateToRoute('/economic-indicators')">経済指標</div>
-                <div class="dropdown-item" @click="navigateToRoute('/economic-statistics')">経済・調査統計</div>
+                <div class="dropdown-item" @click="navigateToRoute('/economic-research')">経済・調査統計</div>
               </div>
             </div>
             

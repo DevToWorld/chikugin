@@ -1,13 +1,7 @@
 <template>
-  <div :class="[`frame-1321317474`, className || ``]" @click="goToPublication" style="cursor: pointer;">
+  <div :class="[`frame-1321317474`, className || ``]" @click="handleClick" style="cursor: pointer;">
     <div class="frame-1321317473-2">
       <div class="overlap-group1" :style="bgStyle">
-        <img
-          class="x2-2-2"
-          :src="resolvedImageUrl"
-          alt="publication cover"
-          @error="onImgError"
-        />
         <div class="overlap-group-6">
           <div class="date-2 valign-text-middle inter-normal-ship-gray-15px">{{ date || '2025.04.28' }}</div>
           <div
@@ -25,38 +19,34 @@
 
 <script>
 import shrinkOnWrap from '@/directives/shrinkOnWrap'
+import { getApiBaseUrl } from '@/config/api'
 export default {
   name: "Frame1321317474",
-  props: ["x22", "className", "date", "title"],
+  props: ["x22", "className", "date", "title", "reportId", "reportType"],
   directives: { shrinkOnWrap },
   methods: {
-    onImgError(e) {
-      // 画像読み込み失敗時はプレースホルダーに差し替え
-      if (e && e.target) e.target.src = this.fallbackImage
-    },
-    goToPublication() {
-      // 刊行物ページに遷移
-      this.$router.push('/publication');
+    handleClick() {
+      // reportTypeが'economic_report'の場合は経済統計ページへ、それ以外は刊行物ページへ
+      if (this.reportType === 'economic_report' && this.reportId) {
+        this.$router.push(`/economic-statistics/${this.reportId}/detail`);
+      } else {
+        this.$router.push('/publication');
+      }
     }
   },
   computed: {
-    fallbackImage() {
-      // 既存のデフォルト画像（data.js と整合）
-      return '/img/-----2-2.png'
-    },
-    resolvedImageUrl() {
-      const url = this.x22 || ''
-      try {
-        const isHttps = typeof window !== 'undefined' && window.location && window.location.protocol === 'https:'
-        if (isHttps && typeof url === 'string' && url.startsWith('http://')) {
-          // モバイルSafari等の混在コンテンツ対策
-          return this.fallbackImage
-        }
-      } catch(_) {}
-      return url || this.fallbackImage
-    },
     bgStyle() {
-      const url = this.resolvedImageUrl
+      let url = this.x22 || '/img/image-1.png'
+      
+      // Convert relative URLs to full URLs with API host
+      if (!url.startsWith('http://') && !url.startsWith('https://')) {
+        if (url.startsWith('/')) {
+          url = getApiBaseUrl() + url
+        } else {
+          url = getApiBaseUrl() + '/' + url
+        }
+      }
+      
       return {
         backgroundImage: `url(${url})`,
         backgroundSize: 'cover',
@@ -90,14 +80,6 @@ export default {
   width: 583px;
 }
 
-.x2-2-2 {
-  height: 350px;
-  left: 0;
-  object-fit: cover;
-  position: absolute;
-  top: 0;
-  width: 583px;
-}
 
 .overlap-group-6 {
   align-items: flex-start;
@@ -195,10 +177,6 @@ export default {
     max-width: 583px;
   }
   
-  .x2-2-2 {
-    width: 100%;
-    max-width: 583px;
-  }
   
   .overlap-group-6 {
     width: 75%;
@@ -232,10 +210,6 @@ export default {
     height: 499px !important;
   }
   
-  .x2-2-2 {
-    width: 900px !important;
-    height: 450px !important;
-  }
   
   .overlap-group-6 {
     width: 75% !important;
@@ -270,9 +244,6 @@ export default {
     height: 300px !important;
   }
   
-  .x2-2-2 {
-    height: 250px !important;
-  }
   
   .overlap-group-6 {
     top: 200px !important;

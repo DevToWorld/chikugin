@@ -110,7 +110,7 @@
                <div class="content-text">{{ featuredPublication.description }}</div>
              </div>
 
-            <button class="download-btn" @click.stop="handleDownloadOrNavigate(featuredPublication)">{{ getButtonLabel(featuredPublication) }}
+            <button class="download-btn" :class="{ disabled: !isItemDownloadable(featuredPublication) }" @click.stop="handleDownloadOrNavigate(featuredPublication)">{{ getButtonLabel(featuredPublication) }}
               <div class="icon-box">
                 <div class="pdf-icon-wrapper">
                   <img class="pdf-icon" :src="getButtonLabel(featuredPublication) === 'PDFダウンロード' ? '/img/pdfaicon.png' : '/img/arrow-icon.svg'" :alt="getButtonLabel(featuredPublication) === 'PDFダウンロード' ? 'PDF' : '詳細'" width="24" height="24" />
@@ -144,7 +144,7 @@
                 <span class="featured-year">{{ formatDate(publication.publication_date) }}</span>
               </div>
               <h3 class="publication-title">{{ publication.title }}</h3>
-              <button class="publication-download" @click.stop="handleDownloadOrNavigate(publication)">{{ getButtonLabel(publication) }}
+              <button class="publication-download" :class="{ disabled: !isItemDownloadable(publication) }" @click.stop="handleDownloadOrNavigate(publication)">{{ getButtonLabel(publication) }}
                 <div class="icon-box">
                 <div class="pdf-icon-wrapper">
                   <img class="pdf-icon" :src="getButtonLabel(publication) === 'PDFダウンロード' ? '/img/pdfaicon.png' : '/img/arrow-icon.svg'" :alt="getButtonLabel(publication) === 'PDFダウンロード' ? 'PDF' : '詳細'" width="24" height="24" />
@@ -367,10 +367,18 @@ export default {
     },
     // ダウンロード可否
     canAccess(item) {
-      return !this.isRestricted(item)
+      if (!item) return false;
+      
+      // ダウンロード不可の場合
+      if (!this.isItemDownloadable(item)) {
+        return false;
+      }
+      
+      return !this.isRestricted(item);
     },
     // ボタン文言（アクセス不可時は会員種別を表示）
     getButtonLabel(item) {
+      if (!this.isItemDownloadable(item)) return 'ダウンロード不可'
       if (this.canAccess(item)) return 'PDFダウンロード'
       const level = this.getItemLevel(item)
       if (level === 'premium') return 'プレミアム会員限定'
@@ -383,6 +391,27 @@ export default {
       const level = (item.membership_level || item.membershipLevel || '').toLowerCase()
       if (level === 'standard' || level === 'premium' || level === 'free') return level
       return null
+    },
+    // アイテムがダウンロード可能かどうかの判定（文字列/数値/真偽値を正規化）
+    isItemDownloadable(item) {
+      if (!item) return false;
+      const value = item.is_downloadable;
+      
+      // 真偽値の場合
+      if (typeof value === 'boolean') return value;
+      
+      // 文字列の場合
+      if (typeof value === 'string') {
+        return value === '1' || value.toLowerCase() === 'true';
+      }
+      
+      // 数値の場合
+      if (typeof value === 'number') {
+        return value === 1;
+      }
+      
+      // その他はfalse
+      return false;
     },
 
     async loadPublications() {
@@ -484,6 +513,13 @@ export default {
     // 無料公開ならダウンロード、会員限定なら詳細/ログインへ
     handleDownloadOrNavigate(item) {
       if (!item) return
+      
+      // ダウンロード不可の場合は何もしない
+      if (!this.isItemDownloadable(item)) {
+        alert('このレポートはダウンロードできません。');
+        return;
+      }
+      
       if (this.isRestricted(item)) {
         this.goToStatisticsDetail(item.id)
       } else {
@@ -499,8 +535,10 @@ export default {
           // APIの差異（download_url/file_url）に両対応
           const url = response.data.file_url || response.data.download_url;
           if (url) {
-            // ダウンロードURLにリダイレクト
-            window.open(url, '_blank');
+            // ダウンロードURLを解決（API hostを付与）
+            const { resolveMediaUrl } = require('@/utils/url.js')
+            const downloadUrl = resolveMediaUrl(url)
+            window.open(downloadUrl, '_blank');
           } else {
             throw new Error('ダウンロードURLが取得できませんでした');
           }
@@ -959,6 +997,16 @@ export default {
   opacity: 0.8;
 }
 
+.download-btn.disabled {
+  background: #ccc;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.download-btn.disabled:hover {
+  opacity: 0.6;
+}
+
 /* Publications Container */
 .publications-container {
   background: white;
@@ -1108,6 +1156,16 @@ export default {
 
 .publication-download:hover {
   opacity: 0.8;
+}
+
+.publication-download.disabled {
+  background: #ccc;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.publication-download.disabled:hover {
+  opacity: 0.6;
 }
 
 .loading {

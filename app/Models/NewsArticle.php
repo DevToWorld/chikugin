@@ -18,12 +18,16 @@ class NewsArticle extends Model
         'author',
         'category',
         'type',
+        'priority',
         'tags',
         'featured_image',
+        'link_url',
+        'link_text',
         'view_count',
         'is_featured',
         'is_published',
-        'published_at'
+        'published_at',
+        'expire_date'
     ];
 
     protected $casts = [
@@ -31,7 +35,8 @@ class NewsArticle extends Model
         'view_count' => 'integer',
         'is_featured' => 'boolean',
         'is_published' => 'boolean',
-        'published_at' => 'datetime'
+        'published_at' => 'datetime',
+        'expire_date' => 'datetime'
     ];
 
     protected static function boot()

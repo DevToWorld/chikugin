@@ -20,6 +20,8 @@ class Publication extends Model
         'author',
         'pages',
         'file_url',
+        'file_name',
+        'file_size',
         'cover_image',
         'price',
         'tags',
@@ -63,7 +65,17 @@ class Publication extends Model
         }
 
         // ルート相対（/img/..., /storage/... など）はそのまま
-        if (str_starts_with($path, '/')) {
+        if (str_starts_with($path, '/storage/')) {
+            return $path;
+        }
+        
+        // /publications/ で始まる場合は /storage/ に変換
+        if (str_starts_with($path, '/publications/')) {
+            return '/storage' . $path;
+        }
+        
+        // /img/ で始まる場合はそのまま
+        if (str_starts_with($path, '/img/')) {
             return $path;
         }
 
@@ -87,5 +99,16 @@ class Publication extends Model
         }
 
         return '/img/image-1.png';
+    }
+
+    /**
+     * 公開されている刊行物のスコープ
+     * - is_published が true
+     * - publication_date が現在日時以前
+     */
+    public function scopePublished($query)
+    {
+        return $query->where('is_published', true)
+                     ->where('publication_date', '<=', now());
     }
 }

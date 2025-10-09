@@ -23,6 +23,7 @@
 
 <script>
 import shrinkOnWrap from '@/directives/shrinkOnWrap'
+import { getApiBaseUrl } from '@/config/api'
 export default {
   name: "Frame1321317475",
   props: ["x22", "hotInformationVol324", "date"],
@@ -38,13 +39,26 @@ export default {
       return '/img/-----2-2-4.png'
     },
     resolvedImageUrl() {
-      const url = this.x22 || ''
+      let url = this.x22 || ''
+      
+      if (!url) return this.fallbackImage
+      
+      // Convert relative URLs to full URLs with API host
+      if (!url.startsWith('http://') && !url.startsWith('https://')) {
+        if (url.startsWith('/')) {
+          url = getApiBaseUrl() + url
+        } else {
+          url = getApiBaseUrl() + '/' + url
+        }
+      }
+      
       try {
         const isHttps = typeof window !== 'undefined' && window.location && window.location.protocol === 'https:'
         if (isHttps && typeof url === 'string' && url.startsWith('http://')) {
           return this.fallbackImage
         }
       } catch(_) {}
+      
       return url || this.fallbackImage
     }
   }

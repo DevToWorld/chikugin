@@ -231,10 +231,23 @@ class ApiClient {
     }
     const res = await fetch(url, { method: (options.method || 'POST'), headers, body: formData })
     if (!res.ok) {
-      let msg = ''
-      try { msg = await res.text() } catch(e) {}
-      try { msg = JSON.parse(msg).message || msg } catch(e) {}
-      return { success: false, error: msg || `HTTP ${res.status}` }
+      let errorData = null
+      let errorText = ''
+      try { 
+        errorText = await res.text() 
+        errorData = JSON.parse(errorText)
+      } catch(e) { 
+        errorData = { message: errorText || `HTTP ${res.status}` }
+      }
+      
+      // Return structured error response
+      return { 
+        success: false, 
+        error: errorData.message || errorData.error || `HTTP ${res.status}`,
+        message: errorData.message || errorData.error || `HTTP ${res.status}`,
+        errors: errorData.errors || null,
+        status: res.status
+      }
     }
     const ct = res.headers.get('Content-Type') || ''
     if (ct.includes('application/json')) {

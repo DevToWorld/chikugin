@@ -649,8 +649,9 @@ export default {
       try {
         const response = await apiClient.downloadPublication(publicationId);
         if (response.success && response.data.download_url) {
-          // ダウンロードリンクを開く
-          window.open(response.data.download_url, '_blank');
+          // ダウンロードリンクを開く（API hostを付与）
+          const downloadUrl = resolveMediaUrl(response.data.download_url);
+          window.open(downloadUrl, '_blank');
           try { await apiClient.logMemberAccess({ content_type: 'publication', content_id: publicationId, access_type: 'download' }) } catch(e) { /* noop */ }
         }
       } catch (err) {

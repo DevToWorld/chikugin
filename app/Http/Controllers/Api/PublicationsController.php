@@ -14,7 +14,8 @@ class PublicationsController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Publication::query();
+        // 公開済みかつ公開日が過ぎたもののみ表示
+        $query = Publication::published();
 
         if ($request->has('category')) {
             $query->where('category', $request->category);
@@ -22,10 +23,6 @@ class PublicationsController extends Controller
 
         if ($request->has('type')) {
             $query->where('type', $request->type);
-        }
-
-        if ($request->has('is_published')) {
-            $query->where('is_published', $request->is_published);
         }
 
         if ($request->has('search')) {
@@ -95,7 +92,8 @@ class PublicationsController extends Controller
      */
     public function show($id)
     {
-        $publication = Publication::findOrFail($id);
+        // 公開済みかつ公開日が過ぎたもののみ表示
+        $publication = Publication::published()->findOrFail($id);
         
         // 閲覧数をインクリメント
         $publication->increment('view_count');
@@ -167,7 +165,7 @@ class PublicationsController extends Controller
      */
     public function featured()
     {
-        $publications = Publication::where('is_published', true)
+        $publications = Publication::published()
                                   ->orderBy('view_count', 'desc')
                                   ->limit(5)
                                   ->get();
@@ -180,7 +178,7 @@ class PublicationsController extends Controller
      */
     public function latest()
     {
-        $publications = Publication::where('is_published', true)
+        $publications = Publication::published()
                                   ->orderBy('publication_date', 'desc')
                                   ->limit(10)
                                   ->get();

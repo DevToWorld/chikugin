@@ -19,6 +19,21 @@ class NoticeController extends Controller
     {
         $query = NewsArticle::where('type', 'notice');
 
+        // 公開フィルター（管理画面以外では公開済みのみ表示）
+        // /api/admin/notices の場合は全て表示、/api/notices の場合は公開済みのみ
+        $isAdminRequest = $request->is('api/admin/*');
+        if (!$isAdminRequest) {
+            $query->where('is_published', true)
+                  ->whereNotNull('published_at')
+                  ->where('published_at', '<=', now());
+            
+            // 公開終了日チェック
+            $query->where(function ($q) {
+                $q->whereNull('expire_date')
+                  ->orWhere('expire_date', '>=', now());
+            });
+        }
+
         // 検索フィルター
         if ($request->has('search') && $request->search) {
             $search = $request->search;
@@ -54,9 +69,25 @@ class NoticeController extends Controller
     /**
      * お知らせ詳細を取得
      */
-    public function show($id): JsonResponse
+    public function show($id, Request $request): JsonResponse
     {
-        $notice = NewsArticle::where('type', 'notice')->findOrFail($id);
+        $query = NewsArticle::where('type', 'notice')->where('id', $id);
+        
+        // 公開フィルター（管理画面以外では公開済みのみ表示）
+        $isAdminRequest = $request->is('api/admin/*');
+        if (!$isAdminRequest) {
+            $query->where('is_published', true)
+                  ->whereNotNull('published_at')
+                  ->where('published_at', '<=', now());
+            
+            // 公開終了日チェック
+            $query->where(function ($q) {
+                $q->whereNull('expire_date')
+                  ->orWhere('expire_date', '>=', now());
+            });
+        }
+        
+        $notice = $query->firstOrFail();
         return response()->json($notice);
     }
 
@@ -72,6 +103,10 @@ class NoticeController extends Controller
             'category' => 'required|string|max:100',
             'status' => 'required|in:draft,published,archived',
             'published_at' => 'nullable|date',
+            'expire_date' => 'nullable|date',
+            'priority' => 'nullable|string|in:high,medium,low',
+            'link_url' => 'nullable|url|max:500',
+            'link_text' => 'nullable|string|max:255',
             'featured' => 'boolean',
 
 
@@ -93,10 +128,14 @@ class NoticeController extends Controller
             // お知らせとして type=notice を固定し、category はサブカテゴリとして保存
             'type' => 'notice',
             'category' => $request->category,
+            'priority' => $request->priority,
             'is_published' => $request->status === 'published',
             'published_at' => $request->published_at ?? ($request->status === 'published' ? now() : null),
+            'expire_date' => $request->expire_date,
             'is_featured' => $request->featured ?? false,
             'featured_image' => $request->featured_image,
+            'link_url' => $request->link_url,
+            'link_text' => $request->link_text,
         ]);
 
         return response()->json([
@@ -142,6 +181,10 @@ class NoticeController extends Controller
             'category' => 'required|string|max:100',
             'status' => 'required|in:draft,published,archived',
             'published_at' => 'nullable|date',
+            'expire_date' => 'nullable|date',
+            'priority' => 'nullable|string|in:high,medium,low',
+            'link_url' => 'nullable|url|max:500',
+            'link_text' => 'nullable|string|max:255',
             'featured' => 'boolean',
 
 
@@ -160,11 +203,15 @@ class NoticeController extends Controller
             'content' => $request->content,
             'summary' => $request->summary,
             'category' => $request->category,
+            'priority' => $request->priority,
             // is_published/published_at を NewsArticle のスキーマに合わせて更新
             'is_published' => $request->status === 'published',
             'published_at' => $request->published_at,
+            'expire_date' => $request->expire_date,
             'is_featured' => $request->featured ?? false,
             'featured_image' => $request->featured_image,
+            'link_url' => $request->link_url,
+            'link_text' => $request->link_text,
         ];
 
         // 公開状態に変更された場合は公開日時を設定

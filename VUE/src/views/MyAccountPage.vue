@@ -770,7 +770,10 @@ export default {
         if (res && res.success) {
           const url = res.data?.download_url || res.data?.url || res.download_url
           if (url) {
-            window.open(url, '_blank')
+            // ダウンロードURLを解決（API hostを付与）
+            const { resolveMediaUrl } = require('@/utils/url.js')
+            const downloadUrl = resolveMediaUrl(url)
+            window.open(downloadUrl, '_blank')
             alert('ダウンロードを開始します')
           } else {
             alert('ダウンロードURLが取得できませんでした')

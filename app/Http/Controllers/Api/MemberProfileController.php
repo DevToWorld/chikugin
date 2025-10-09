@@ -3,10 +3,12 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Mail\MemberProfileUpdateNotification;
 use App\Models\Member;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\Rule;
 
 class MemberProfileController extends Controller
@@ -128,6 +130,9 @@ class MemberProfileController extends Controller
                 'email.unique' => 'このメールアドレスは既に使用されています',
             ]);
 
+            // 変更内容を追跡
+            $changes = $this->detectChanges($member, $validated);
+
             // プロフィール更新
             // email_index を同時更新
             if (!empty($validated['email'])) {
@@ -137,6 +142,11 @@ class MemberProfileController extends Controller
 
             // 更新後のデータを返却
             $member->refresh();
+
+            // 管理者にメール通知を送信
+            if (!empty($changes)) {
+                $this->sendAdminNotification($member, $changes);
+            }
 
             return response()->json([
                 'success' => true,
@@ -213,6 +223,72 @@ class MemberProfileController extends Controller
                 'message' => 'パスワードの変更に失敗しました',
                 'error' => $e->getMessage()
             ], 500);
+        }
+    }
+
+    /**
+     * 変更内容を検出
+     */
+    private function detectChanges(Member $member, array $validated): array
+    {
+        $changes = [];
+        $fieldLabels = [
+            'company_name' => '会社名',
+            'representative_name' => '代表者名',
+            'position' => '役職',
+            'department' => '部署',
+            'phone' => '電話番号',
+            'postal_code' => '郵便番号',
+            'address' => '住所',
+            'capital' => '資本金',
+            'industry' => '業種',
+            'region' => '地域',
+            'concerns' => '関心事',
+            'notes' => '備考',
+            'email' => 'メールアドレス',
+        ];
+
+        foreach ($validated as $field => $newValue) {
+            if ($field === 'email_index') continue; // Skip internal field
+            
+            $oldValue = $member->$field;
+            
+            // 暗号化されている可能性のあるフィールドを復号化
+            $oldValue = $this->maybeDecrypt($oldValue);
+            
+            // 値が変更された場合のみ記録
+            if ((string)$oldValue !== (string)$newValue) {
+                $changes[$field] = [
+                    'label' => $fieldLabels[$field] ?? $field,
+                    'old' => $oldValue,
+                    'new' => $newValue,
+                ];
+            }
+        }
+
+        return $changes;
+    }
+
+    /**
+     * 管理者に通知メールを送信
+     */
+    private function sendAdminNotification(Member $member, array $changes): void
+    {
+        try {
+            $adminEmail = config('mail.admin_notification_email');
+            
+            if (empty($adminEmail)) {
+                \Log::warning('Admin notification email not configured. Skipping notification.');
+                return;
+            }
+
+            Mail::to($adminEmail)->send(new MemberProfileUpdateNotification($member, $changes));
+        } catch (\Exception $e) {
+            // メール送信失敗時はログに記録するが、エラーは投げない
+            \Log::error('Failed to send admin notification email: ' . $e->getMessage(), [
+                'member_id' => $member->id,
+                'changes' => $changes,
+            ]);
         }
     }
 

@@ -148,6 +148,19 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Admin Notification Email
+    |--------------------------------------------------------------------------
+    |
+    | This email address will receive notifications when members update 
+    | their profile information. Set this in your .env file:
+    | ADMIN_NOTIFICATION_EMAIL=info@chikugin-ri.co.jp
+    |
+    */
+
+    'admin_notification_email' => env('ADMIN_NOTIFICATION_EMAIL'),
+
+    /*
+    |--------------------------------------------------------------------------
     | Markdown Mail Settings
     |--------------------------------------------------------------------------
     |

@@ -251,84 +251,26 @@
                     :style="{ cursor: currentIndex > 0 ? 'pointer' : 'default' }"
                   />
                   <img
-                    :class="['vector-10', { 'vector-10-disabled': currentIndex >= 7, 'vector-10-enabled': currentIndex < 7 }]"
+                    :class="['vector-10', { 'vector-10-disabled': currentIndex >= (othersIndices.length - 1), 'vector-10-enabled': currentIndex < (othersIndices.length - 1) }]"
                     :src="vector101"
                     alt="Vector 10"
-                    @click="currentIndex < 7 ? nextPublication() : null"
-                    :style="{ cursor: currentIndex < 7 ? 'pointer' : 'default' }"
+                    @click="currentIndex < (othersIndices.length - 1) ? nextPublication() : null"
+                    :style="{ cursor: currentIndex < (othersIndices.length - 1) ? 'pointer' : 'default' }"
                   />
                 </div>
                 <x-button3 class="desktop-publication-button" @click="goToPublicationList" />
               </div>
-              <div class="frame-1321317486" :style="{ transform: `translateX(${slideOffset}px)` }">
-                <div class="publication-item-wrapper" @click="goToPublication(0)">
+              <div class="frame-1321317486" :style="{ transform: `translateX(${slideOffset}px)`, width: `${dynamicPublications.length * 279}px` }">
+                <div 
+                  v-for="(publication, index) in dynamicPublications" 
+                  :key="index"
+                  class="publication-item-wrapper" 
+                  @click="goToPublication(index)"
+                >
                   <frame1321317475
-                    :x22="dynamicPublications[0] ? dynamicPublications[0].x22 : frame13213174751Props.x22"
-                    :hotInformationVol324="dynamicPublications[0] ? dynamicPublications[0].hotInformationVol324 : frame13213174751Props.hotInformationVol324"
-                    :date="dynamicPublications[0] ? dynamicPublications[0].date : undefined"
-                  />
-                </div>
-                <div class="publication-item-wrapper" @click="goToPublication(1)">
-                  <frame1321317475
-                    :x22="dynamicPublications[1] ? dynamicPublications[1].x22 : frame13213174752Props.x22"
-                    :hotInformationVol324="dynamicPublications[1] ? dynamicPublications[1].hotInformationVol324 : frame13213174752Props.hotInformationVol324"
-                    :date="dynamicPublications[1] ? dynamicPublications[1].date : undefined"
-                  />
-                </div>
-                <div class="publication-item-wrapper" @click="goToPublication(2)">
-                  <frame1321317475
-                    :x22="dynamicPublications[2] ? dynamicPublications[2].x22 : frame13213174752Props.x22"
-                    :hotInformationVol324="dynamicPublications[2] ? dynamicPublications[2].hotInformationVol324 : frame13213174752Props.hotInformationVol324"
-                    :date="dynamicPublications[2] ? dynamicPublications[2].date : undefined"
-                  />
-                </div>
-                <div class="publication-item-wrapper" @click="goToPublication(3)">
-                  <frame1321317475
-                    :x22="dynamicPublications[3] ? dynamicPublications[3].x22 : frame13213174752Props.x22"
-                    :hotInformationVol324="dynamicPublications[3] ? dynamicPublications[3].hotInformationVol324 : frame13213174752Props.hotInformationVol324"
-                    :date="dynamicPublications[3] ? dynamicPublications[3].date : undefined"
-                  />
-                </div>
-                <div class="publication-item-wrapper" @click="goToPublication(4)">
-                  <frame1321317475
-                    :x22="dynamicPublications[4] ? dynamicPublications[4].x22 : frame13213174752Props.x22"
-                    :hotInformationVol324="dynamicPublications[4] ? dynamicPublications[4].hotInformationVol324 : frame13213174752Props.hotInformationVol324"
-                    :date="dynamicPublications[4] ? dynamicPublications[4].date : undefined"
-                  />
-                </div>
-                <div class="publication-item-wrapper" @click="goToPublication(5)">
-                  <frame1321317475
-                    :x22="dynamicPublications[5] ? dynamicPublications[5].x22 : frame13213174752Props.x22"
-                    :hotInformationVol324="dynamicPublications[5] ? dynamicPublications[5].hotInformationVol324 : frame13213174752Props.hotInformationVol324"
-                    :date="dynamicPublications[5] ? dynamicPublications[5].date : undefined"
-                  />
-                </div>
-                <div class="publication-item-wrapper" @click="goToPublication(6)">
-                  <frame1321317475
-                    :x22="dynamicPublications[6] ? dynamicPublications[6].x22 : frame13213174752Props.x22"
-                    :hotInformationVol324="dynamicPublications[6] ? dynamicPublications[6].hotInformationVol324 : frame13213174752Props.hotInformationVol324"
-                    :date="dynamicPublications[6] ? dynamicPublications[6].date : undefined"
-                  />
-                </div>
-                <div class="publication-item-wrapper" @click="goToPublication(7)">
-                  <frame1321317475
-                    :x22="dynamicPublications[7] ? dynamicPublications[7].x22 : frame13213174752Props.x22"
-                    :hotInformationVol324="dynamicPublications[7] ? dynamicPublications[7].hotInformationVol324 : frame13213174752Props.hotInformationVol324"
-                    :date="dynamicPublications[7] ? dynamicPublications[7].date : undefined"
-                  />
-                </div>
-                <div class="publication-item-wrapper" @click="goToPublication(8)">
-                  <frame1321317475
-                    :x22="dynamicPublications[8] ? dynamicPublications[8].x22 : frame13213174752Props.x22"
-                    :hotInformationVol324="dynamicPublications[8] ? dynamicPublications[8].hotInformationVol324 : frame13213174752Props.hotInformationVol324"
-                    :date="dynamicPublications[8] ? dynamicPublications[8].date : undefined"
-                  />
-                </div>
-                <div class="publication-item-wrapper" @click="goToPublication(9)">
-                  <frame1321317475
-                    :x22="dynamicPublications[9] ? dynamicPublications[9].x22 : frame13213174752Props.x22"
-                    :hotInformationVol324="dynamicPublications[9] ? dynamicPublications[9].hotInformationVol324 : frame13213174752Props.hotInformationVol324"
-                    :date="dynamicPublications[9] ? dynamicPublications[9].date : undefined"
+                    :x22="publication.x22"
+                    :hotInformationVol324="publication.hotInformationVol324"
+                    :date="publication.date"
                   />
                 </div>
               </div>
@@ -368,94 +310,153 @@
             </div>
           </div>
           <div class="content-view-1">
-            <frame1321317474 :x22="frame13213174742Props.x22" :className="frame13213174742Props.className" />
+            <frame1321317474 
+              :x22="frame13213174742Props.x22" 
+              :className="frame13213174742Props.className"
+              :date="frame13213174742Props.date"
+              :title="frame13213174742Props.title"
+              :reportId="mainEconomicReport?.id"
+              :reportType="mainEconomicReport ? 'economic_report' : null"
+            />
             <div class="frame-1321317473">
               <div class="frame-1321317473-1">
                 <div class="overlap-group-container">
-                  <div class="overlap-group3-1" @click="goToEconomicIndicators" style="cursor: pointer;">
-                    <img class="x2-2-1" :src="x222" alt="2 2" />
-                    <div class="overlap-group2">
-                      <div class="flex-col-2">
-                        <CmsText
-                          pageKey="home"
-                          fieldKey="other_info_economic_label"
-                          tag="div"
-                          class="text-4 valign-text-middle inter-semi-bold-ship-gray-12px"
-                          :fallback="'経済指標'"
-                        />
-                        <CmsText
-                          pageKey="home"
-                          fieldKey="other_info_economic_cta"
-                          tag="div"
-                          class="viwe-more valign-text-middle inter-normal-ship-gray-10px"
-                          :fallback="'View More .'"
-                        />
-                      </div>
-                      <div class="caret-right">
-                        <img
-                          class="vector-14"
-                          :src="vector65"
-                          alt="Vector"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                  <div class="overlap-group-1" @click="goToFinancialReport" style="cursor: pointer;">
-                    <img class="x2-3" :src="x23" alt="2 3" />
-                    <div class="overlap-group-2">
-                      <div class="flex-col">
-                        <CmsText
-                          pageKey="home"
-                          fieldKey="other_info_financial_label"
-                          tag="div"
-                          class="text-4 valign-text-middle inter-semi-bold-ship-gray-12px"
-                          :fallback="'決算報告'"
-                        />
-                        <CmsText
-                          pageKey="home"
-                          fieldKey="other_info_financial_cta"
-                          tag="div"
-                          class="viwe-more valign-text-middle inter-normal-ship-gray-10px"
-                          :fallback="'View More .'"
-                        />
-                      </div>
-                      <div class="caret-right">
-                        <img
-                          class="vector-14"
-                          :src="vector61"
-                          alt="Vector"
-                        />
+                  <!-- Show featured economic reports if available, otherwise show default items -->
+                  <template v-if="featuredEconomicReports.length > 1">
+                    <!-- Dynamic featured economic reports sub-items -->
+                    <div 
+                      v-for="(report, index) in featuredEconomicReports.slice(1, 4)" 
+                      :key="report.id"
+                      class="overlap-group-1" 
+                      @click="goToEconomicReport(report.id)" 
+                      style="cursor: pointer;"
+                    >
+                      <img 
+                        class="x2-2-1" 
+                        :src="report.cover_image_url || '/img/image-1.png'" 
+                        :alt="report.title" 
+                      />
+                      <div class="overlap-group-2">
+                        <div class="flex-col-2">
+                          <div class="text-4 valign-text-middle inter-semi-bold-ship-gray-12px">
+                            {{ report.title }}
+                          </div>
+                          <div class="viwe-more valign-text-middle inter-normal-ship-gray-10px">
+                            View More .
+                          </div>
+                        </div>
+                        <div class="caret-right">
+                          <img
+                            class="vector-14"
+                            :src="vector65"
+                            alt="Vector"
+                          />
+                        </div>
                       </div>
                     </div>
-                  </div>
-                  <div class="overlap-group-1" @click="$router.push('/glossary')" style="cursor: pointer;">
-                    <img class="x2-4" :src="x24" alt="2 4" />
-                    <div class="overlap-group-2">
-                      <div class="flex-col">
-                        <CmsText
-                          pageKey="home"
-                          fieldKey="other_info_glossary_label"
-                          tag="div"
-                          class="text-4 valign-text-middle inter-semi-bold-ship-gray-12px"
-                          :fallback="'用語集'"
-                        />
-                        <CmsText
-                          pageKey="home"
-                          fieldKey="other_info_glossary_cta"
-                          tag="div"
-                          class="viwe-more valign-text-middle inter-normal-ship-gray-10px"
-                          :fallback="'View More .'"
-                        />
-                      </div>
-                      <div class="caret-right">
-                        <img
-                          class="vector-14"
-                          src="/img/vector-61.svg"
-                          alt="Vector"
-                        />
+                  </template>
+                  
+                  <!-- Default items when no featured reports or only 1 featured report -->
+                  <template v-else>
+                    <div 
+                      class="overlap-group3-1" 
+                      @click="goToEconomicIndicators" 
+                      style="cursor: pointer;"
+                    >
+                      <img class="x2-2-1" :src="x222" alt="2 2" />
+                      <div class="overlap-group2">
+                        <div class="flex-col-2">
+                          <CmsText
+                            pageKey="home"
+                            fieldKey="other_info_economic_label"
+                            tag="div"
+                            class="text-4 valign-text-middle inter-semi-bold-ship-gray-12px"
+                            :fallback="'経済指標'"
+                          />
+                          <CmsText
+                            pageKey="home"
+                            fieldKey="other_info_economic_cta"
+                            tag="div"
+                            class="viwe-more valign-text-middle inter-normal-ship-gray-10px"
+                            :fallback="'View More .'"
+                          />
+                        </div>
+                        <div class="caret-right">
+                          <img
+                            class="vector-14"
+                            :src="vector65"
+                            alt="Vector"
+                          />
+                        </div>
                       </div>
                     </div>
-                  </div>
+                    
+                    <div 
+                      class="overlap-group-1" 
+                      @click="goToFinancialReport" 
+                      style="cursor: pointer;"
+                    >
+                      <img class="x2-3" :src="x23" alt="2 3" />
+                      <div class="overlap-group-2">
+                        <div class="flex-col">
+                          <CmsText
+                            pageKey="home"
+                            fieldKey="other_info_financial_label"
+                            tag="div"
+                            class="text-4 valign-text-middle inter-semi-bold-ship-gray-12px"
+                            :fallback="'決算報告'"
+                          />
+                          <CmsText
+                            pageKey="home"
+                            fieldKey="other_info_financial_cta"
+                            tag="div"
+                            class="viwe-more valign-text-middle inter-normal-ship-gray-10px"
+                            :fallback="'View More .'"
+                          />
+                        </div>
+                        <div class="caret-right">
+                          <img
+                            class="vector-14"
+                            :src="vector61"
+                            alt="Vector"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div 
+                      class="overlap-group-1" 
+                      @click="$router.push('/glossary')" 
+                      style="cursor: pointer;"
+                    >
+                      <img class="x2-4" :src="x24" alt="2 4" />
+                      <div class="overlap-group-2">
+                        <div class="flex-col">
+                          <CmsText
+                            pageKey="home"
+                            fieldKey="other_info_glossary_label"
+                            tag="div"
+                            class="text-4 valign-text-middle inter-semi-bold-ship-gray-12px"
+                            :fallback="'用語集'"
+                          />
+                          <CmsText
+                            pageKey="home"
+                            fieldKey="other_info_glossary_cta"
+                            tag="div"
+                            class="viwe-more valign-text-middle inter-normal-ship-gray-10px"
+                            :fallback="'View More .'"
+                          />
+                        </div>
+                        <div class="caret-right">
+                          <img
+                            class="vector-14"
+                            src="/img/vector-61.svg"
+                            alt="Vector"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </template>
                 </div>
               </div>
             </div>
@@ -521,6 +522,7 @@ import FixedSideButtons from "./FixedSideButtons.vue";
 import { homePageData } from "../data.js";
 import mockServer from "@/mockServer";
 import apiClient from "@/services/apiClient"; // apiClientをインポート
+import { getApiBaseUrl } from '@/config/api'
 import vector35 from "../../public/img/vector-35.svg";
 import vector152 from "../../public/img/vector-15-2.svg";
 import vector63 from "../../public/img/vector-6-3.svg";
@@ -541,6 +543,7 @@ import CmsBlock from './CmsBlock.vue'
 import CmsText from '@/components/CmsText.vue'
 import HeroSection from '@/components/HeroSection.vue'
 import { usePageText } from '@/composables/usePageText'
+import { resolveMediaUrl } from '@/utils/url.js'
 export default {
   name: "HomePage",
   components: {
@@ -641,6 +644,9 @@ export default {
       mainPublicationIndex: 0, // メインに使用する実インデックス
       othersIndices: [], // メイン以外のインデックス一覧
       slideOffset: 0, // スライドアニメーション用のオフセット
+      // Dynamic economic reports data
+      featuredEconomicReports: [], // 特集フラグ付き経済レポート
+      mainEconomicReport: null, // メインに表示する経済レポート（最新）
       // Dynamic news data
       dynamicNewsItems: [], // CMSから取得したお知らせデータ（カテゴリー情報含む）
       // Vector images for UI elements
@@ -751,7 +757,9 @@ export default {
         const getImg = (key, defVal='') => {
           const v = images && images[key]
           if (!v) return defVal
-          if (typeof v === 'string') return v
+          if (typeof v === 'string') {
+            return resolveMediaUrl(v)
+          }
           if (typeof v === 'object' && v.url) {
             let url = v.url
             try {
@@ -760,7 +768,7 @@ export default {
                 if (ver !== null) url += (url.includes('?') ? '&' : '?') + '_t=' + encodeURIComponent(String(ver))
               }
             } catch (_) {}
-            return url
+            return resolveMediaUrl(url)
           }
           return defVal
         }
@@ -834,8 +842,17 @@ export default {
         const getImg = (key) => {
           const v = images ? images[key] : null
           if (!v) return ''
-          if (typeof v === 'string') return v
-          if (typeof v === 'object' && v.url) return v.url
+          if (typeof v === 'string') return resolveMediaUrl(v)
+          if (typeof v === 'object' && v.url) {
+            let url = v.url
+            try {
+              if (typeof url === 'string' && url.startsWith('/storage/') && v.uploaded_at) {
+                const ver = Date.parse(v.uploaded_at) || null
+                if (ver !== null) url += (url.includes('?') ? '&' : '?') + '_t=' + encodeURIComponent(String(ver))
+              }
+            } catch (_) {}
+            return resolveMediaUrl(url)
+          }
           return ''
         }
         const getText = (key, fb='') => (cms.getText ? cms.getText(key, fb, { allowEmpty: true }) : fb)
@@ -878,8 +895,17 @@ export default {
         const getImg = (key, defVal) => {
           const v = images && images[key]
           if (!v) return defVal
-          if (typeof v === 'string') return v
-          if (typeof v === 'object' && v.url) return v.url
+          if (typeof v === 'string') return resolveMediaUrl(v)
+          if (typeof v === 'object' && v.url) {
+            let url = v.url
+            try {
+              if (typeof url === 'string' && url.startsWith('/storage/') && v.uploaded_at) {
+                const ver = Date.parse(v.uploaded_at) || null
+                if (ver !== null) url += (url.includes('?') ? '&' : '?') + '_t=' + encodeURIComponent(String(ver))
+              }
+            } catch (_) {}
+            return resolveMediaUrl(url)
+          }
           return defVal
         }
         this.frame13213174901 = getImg('banner_seminar', this.frame13213174901)
@@ -919,25 +945,28 @@ export default {
             const seminars = await mockServer.getSeminars();
             const publications = await mockServer.getPublications();
             const notices = await mockServer.getNotices();
-            this.updatePageData(allNews, seminars, publications, notices);
+            this.updatePageData(allNews, seminars, publications, notices, []);
             return;
         }
 
         console.log("Fetching data from API...");
         // APIからデータを取得
-        const [newsResponse, seminarsResponse, publicationsResponse, noticesResponse] = await Promise.all([
+        const [newsResponse, seminarsResponse, publicationsResponse, noticesResponse, economicReportsResponse] = await Promise.all([
           apiClient.getNews({ per_page: 5 }),
           apiClient.getSeminars(),
           apiClient.getPublications(),
-          apiClient.getNotices({ per_page: 5 })
+          apiClient.getNotices({ per_page: 5 }),
+          apiClient.getFeaturedEconomicReport()
         ]);
 
         const seminars = seminarsResponse?.data || [];
         const publications = publicationsResponse?.data?.publications || publicationsResponse?.data || [];
         const notices = (noticesResponse?.data?.data) || (noticesResponse?.data?.notices) || (noticesResponse?.data) || [];
+        const economicReports = economicReportsResponse?.data || [];
+
 
         // お知らせ枠は「お知らせ管理」の内容を表示する
-        this.updatePageData(/*allNews not used*/[], seminars, publications, notices);
+        this.updatePageData(/*allNews not used*/[], seminars, publications, notices, economicReports);
 
       } catch (error) {
         console.error('CMSデータの取得に失敗:', error);
@@ -945,7 +974,7 @@ export default {
       }
     },
 
-    updatePageData(allNews, seminars, publications, notices) {
+    updatePageData(allNews, seminars, publications, notices, economicReports = []) {
       let latestNews = [];
       
       try {
@@ -961,6 +990,23 @@ export default {
         // 安全にプロパティを更新
         if (this && this.dynamicNewsItems !== undefined) {
           this.dynamicNewsItems = latestNews;
+        }
+
+        // 特集経済レポートを処理
+        if (Array.isArray(economicReports) && economicReports.length > 0) {
+          this.featuredEconomicReports = economicReports;
+          // 最新（最初の1件）をメインとして設定
+          this.mainEconomicReport = economicReports[0];
+          
+          // frame13213174742Propsを更新（メインの表示用）
+          if (this.mainEconomicReport) {
+            this.frame13213174742Props = {
+              x22: this.mainEconomicReport.cover_image_url || '/img/image-1.png',
+              className: 'frame-1321317472-1',
+              date: this.formatDate(this.mainEconomicReport.publication_date),
+              title: this.mainEconomicReport.title || '経済レポート'
+            };
+          }
         }
       } catch (error) {
         console.error('updatePageData でエラーが発生:', error);
@@ -1047,16 +1093,27 @@ export default {
       this.refreshVisiblePublications()
     },
     nextPublication() {
-      // 最後（currentIndex = 7）より右には行かないように制限（10個中3個表示なので7が最大）
-      if (this.currentIndex >= 7) return
+      // 最後のアイテムより右には行かないように制限
+      const othersLen = (this.othersIndices || []).length
+      if (this.currentIndex >= othersLen - 1) return
       this.currentIndex = this.currentIndex + 1
       this.refreshVisiblePublications()
     },
     refreshVisiblePublications() {
       const len = this.allPublications.length
       if (!len) return
+      
       // 画像URL取得ヘルパ
-      const pickImage = (item) => (item?.cover_image_url || item?.cover_image?.url || item?.cover_image || item?.image_url || '')
+      const pickImage = (item) => {
+        const image = item?.cover_image_url || item?.cover_image?.url || item?.cover_image || item?.image_url || ''
+        if (!image) return ''
+        // If it's already a full URL, return as is
+        if (image.startsWith('http://') || image.startsWith('https://')) return image
+        // If it starts with /, prepend the API base URL
+        if (image.startsWith('/')) return getApiBaseUrl() + image
+        // Otherwise, assume it's a relative path and prepend API base URL
+        return getApiBaseUrl() + '/' + image
+      }
 
       // メイン: 画像を持つ最初の要素を優先（無ければ先頭）
       let mainIdx = 0
@@ -1071,7 +1128,8 @@ export default {
         title: main?.title || '',
         date: main?.publication_date ? this.formatDate(main.publication_date) : ''
       }
-      // 右側: メイン以外を循環で3件表示
+      
+      // 右側: メイン以外を循環で表示
       const others = []
       for (let i = 0; i < len; i++) if (i !== mainIdx) others.push(i)
       this.othersIndices = others
@@ -1082,26 +1140,24 @@ export default {
         this.frame13213174752Props.x22
       ]
       const list = []
-      for (let i = 0; i < 3; i++) {
-        if (!othersLen) {
-          list.push({ x22: defaultImages[i], hotInformationVol324: '', date: '' })
-          continue
-        }
+      // Only show the actual publications we have, don't fill with empty items
+      for (let i = 0; i < Math.min(10, othersLen); i++) {
         const absoluteIdx = others[(this.currentIndex + i) % othersLen]
         const item = this.allPublications[absoluteIdx]
         list.push({
           // APIの差異に対応（cover_image_url / cover_image.url を優先）
-          x22: pickImage(item) || defaultImages[i],
+          x22: pickImage(item) || defaultImages[i % 3],
           hotInformationVol324: item?.title || '',
           date: item?.publication_date ? this.formatDate(item.publication_date) : '',
           id: item?.id
         })
       }
-        this.dynamicPublications = list
-        // スライドオフセットを計算（各アイテムの幅 + gap）
-        const itemWidth = 259 + 20; // width + gap
-        this.slideOffset = -this.currentIndex * itemWidth
-      },
+      this.dynamicPublications = list
+      
+      // スライドオフセットを計算（各アイテムの幅 + gap）
+      const itemWidth = 259 + 20; // width + gap
+      this.slideOffset = -this.currentIndex * itemWidth
+    },
     getCategoryLabel(newsItem) {
       // お知らせの種類に応じてカテゴリーラベルを返す
       if (!newsItem) return 'NEWS';
@@ -1174,6 +1230,10 @@ export default {
     goToFinancialReport() {
       // 財務報告書ページに遷移
       this.$router.push('/financial-report');
+    },
+    goToEconomicReport(reportId) {
+      // 経済統計レポート詳細ページに遷移
+      this.$router.push(`/economic-statistics/${reportId}/detail`);
     }
   }
   ,
@@ -2108,7 +2168,7 @@ export default {
   flex-direction: column;
   gap: 20px;
   justify-content: flex-end;
-  overflow: hidden;
+  overflow-x: hidden; /* Hide scrollbar */
   position: relative;
   flex: 1;
 }
@@ -2186,7 +2246,14 @@ export default {
   margin-right: -183px;
   position: relative;
   transition: transform 0.3s ease;
-  width: calc(279px * 10); /* 各アイテムの幅 × 10個 */
+  /* width is now set dynamically in the template */
+  /* Hide scrollbar completely */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+}
+
+.frame-1321317486::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
 }
 
 .publication-item-wrapper {
@@ -2723,10 +2790,15 @@ export default {
     flex-wrap: nowrap;
     gap: 15px;
     justify-content: flex-start;
-    overflow-x: auto;
+    overflow-x: hidden; /* Hide scrollbar, use navigation arrows only */
     overflow-y: hidden;
-    scrollbar-width: thin;
-    -webkit-overflow-scrolling: touch;
+    /* Hide scrollbar completely */
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE and Edge */
+  }
+  
+  .frame-1321317486::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
   }
   
   .frame-1321317475 {
@@ -2832,10 +2904,15 @@ export default {
     flex-wrap: nowrap;
     gap: 15px;
     justify-content: flex-start;
-    overflow-x: auto;
+    overflow-x: hidden; /* Hide scrollbar, use navigation arrows only */
     overflow-y: hidden;
-    scrollbar-width: thin;
-    -webkit-overflow-scrolling: touch;
+    /* Hide scrollbar completely */
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE and Edge */
+  }
+  
+  .frame-1321317486::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
   }
 
   .frame-1321317487 {
@@ -3009,10 +3086,15 @@ export default {
     flex-wrap: nowrap;
     gap: 15px;
     justify-content: flex-start;
-    overflow-x: auto;
+    overflow-x: hidden; /* Hide scrollbar, use navigation arrows only */
     overflow-y: hidden;
-    scrollbar-width: thin;
-    -webkit-overflow-scrolling: touch;
+    /* Hide scrollbar completely */
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE and Edge */
+  }
+  
+  .frame-1321317486::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
   }
   
   .frame-1321317475 {

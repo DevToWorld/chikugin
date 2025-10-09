@@ -113,7 +113,7 @@
               <div class="form-row">
                 <div class="form-group">
                   <label for="publication_date" class="form-label">
-                    発行日 <span class="required">*</span>
+                    公開日 <span class="required">*</span>
                   </label>
                   <input
                     id="publication_date"
@@ -173,10 +173,26 @@
               <h3 class="section-title">レポートファイル</h3>
               <div class="form-group">
                 <label class="form-label">PDFファイルを選択 <span class="required">*</span></label>
-                <input type="file" accept="application/pdf" @change="onPickPdf" />
-                <p class="form-help" v-if="pdfFile">選択中: {{ pdfFile.name }}</p>
-                <p class="form-help" v-else-if="formData.file_url">アップロード済みのPDFがあります。再アップロードで置き換えられます。</p>
-                <p class="form-help">アップロード後はDBに保存され、公開ページからダウンロード可能になります。</p>
+                <div class="file-upload-container">
+                  <input type="file" accept="application/pdf" @change="onPickPdf" class="file-input" id="pdf-upload" />
+                  <label for="pdf-upload" class="file-upload-label">
+                    <span v-if="!pdfFile && !formData.file_url">ファイルを選択</span>
+                    <span v-else-if="pdfFile">
+                      ✓ {{ pdfFile.name }} ({{ formatFileSize(pdfFile.size) }})
+                    </span>
+                    <span v-else>
+                      ✓ アップロード済み (再選択で置き換え)
+                    </span>
+                  </label>
+                </div>
+                <p class="form-help" v-if="pdfFile" style="color: #059669; font-weight: 500;">
+                  ✓ 新しいファイルが選択されました: {{ pdfFile.name }} ({{ formatFileSize(pdfFile.size) }})
+                </p>
+                <p class="form-help" v-else-if="formData.file_url" style="color: #0891b2;">
+                  現在のファイル: {{ getOriginalFileName(formData.file_url) || 'PDF' }}
+                  <span v-if="formData.file_size">({{ formatFileSize(formData.file_size * 1024 * 1024) }})</span>
+                </p>
+                <p class="form-help">推奨: 20MB以下のPDFファイル。アップロード後は公開ページからダウンロード可能になります。</p>
               </div>
             </div>
 
@@ -218,7 +234,9 @@
 
             <!-- エラー・成功メッセージ -->
             <div v-if="submitError" class="message error-message">
-              {{ submitError }}
+              <div v-for="(line, index) in submitError.split('\n')" :key="index">
+                {{ line }}
+              </div>
             </div>
 
             <div v-if="successMessage" class="message success-message">
@@ -272,6 +290,7 @@ export default {
         author: '',
         pages: null,
         file_url: '',
+        file_name: '',
         file_size: null,
         download_count: 0,
         is_published: false,
@@ -465,6 +484,7 @@ export default {
           if (typeof v === 'string' && v.trim() === '') return
           fd.append(k, v)
         })
+        // ファイルアップロードは最後に追加（重要：FormDataの順序）
         if (this.coverImageFile) fd.append('cover_image', this.coverImageFile)
         if (this.pdfFile) fd.append('pdf_file', this.pdfFile)
 
@@ -475,17 +495,49 @@ export default {
           // Use POST with _method=PUT for wide PHP compatibility
           fd.append('_method', 'PUT')
         }
+        
+        console.log('Uploading publication:', {
+          endpoint,
+          method,
+          hasCoverImage: !!this.coverImageFile,
+          hasPdfFile: !!this.pdfFile,
+          pdfFileName: this.pdfFile?.name,
+          pdfFileSize: this.pdfFile?.size
+        })
+        
         const res = await apiClient.upload(endpoint, fd, { method })
-        if (!res?.success) throw new Error(res?.message || res?.error || '保存に失敗')
+        console.log('Upload response:', res)
+        
+        if (!res?.success) {
+          // エラーの詳細をログ出力
+          console.error('Upload failed:', res)
+          
+          // バリデーションエラーがある場合は整形して表示
+          if (res.errors && typeof res.errors === 'object') {
+            const errorMessages = Object.entries(res.errors).map(([field, messages]) => {
+              const fieldName = field === 'pdf_file' ? 'PDFファイル' : 
+                               field === 'cover_image' ? 'カバー画像' : 
+                               field === 'title' ? 'タイトル' : 
+                               field === 'description' ? '概要' : 
+                               field === 'category' ? 'カテゴリー' :
+                               field === 'publication_date' ? '公開日' : field
+              const msgs = Array.isArray(messages) ? messages : [messages]
+              return `${fieldName}: ${msgs.join(', ')}`
+            }).join('\n')
+            this.submitError = errorMessages
+          } else {
+            this.submitError = res?.message || res?.error || '保存に失敗しました'
+          }
+          return
+        }
+        
         this.successMessage = this.isNew ? '刊行物を作成しました' : '刊行物を更新しました'
         if (this.isNew) setTimeout(() => { this.$router.push('/admin/publication') }, 1200)
       } catch (err) {
-        if (err.response?.data?.errors) {
-          this.submitError = Object.values(err.response.data.errors).flat().join(', ')
-        } else {
-          this.submitError = this.isNew ? '刊行物の作成に失敗しました' : '刊行物の更新に失敗しました'
-        }
-        console.error(err)
+        console.error('Submit error:', err)
+        
+        // 予期しないエラー
+        this.submitError = err.message || (this.isNew ? '刊行物の作成に失敗しました' : '刊行物の更新に失敗しました')
       } finally {
         this.submitLoading = false
       }
@@ -498,6 +550,31 @@ export default {
       localStorage.removeItem('adminUser')
       // モックサーバーを使用するため、認証ヘッダーの削除は不要
       this.$router.push('/admin')
+    },
+    formatFileSize(bytes) {
+      if (!bytes) return '0 B'
+      const k = 1024
+      const sizes = ['B', 'KB', 'MB', 'GB']
+      const i = Math.floor(Math.log(bytes) / Math.log(k))
+      return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i]
+    },
+    getOriginalFileName(fileUrl) {
+      if (!fileUrl) return ''
+      
+      // Use stored original filename if available
+      if (this.formData.file_name) {
+        return this.formData.file_name
+      }
+      
+      // Fallback: Extract filename from URL
+      const filename = fileUrl.split('/').pop()
+      
+      // If it's a hash filename, show generic name
+      if (filename && filename.length > 20 && filename.includes('.pdf')) {
+        return 'アップロード済みPDFファイル'
+      }
+      
+      return filename || 'PDFファイル'
     }
   }
 }
@@ -513,6 +590,48 @@ export default {
 
 .image-picker { display:flex; gap:12px; align-items:center; }
 .image-preview { width:160px; height:100px; object-fit:cover; border:1px solid #e5e5e5; border-radius:6px; }
+
+/* File upload styling */
+.file-upload-container {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+}
+
+.file-input {
+  position: absolute;
+  opacity: 0;
+  width: 0.1px;
+  height: 0.1px;
+  overflow: hidden;
+  z-index: -1;
+}
+
+.file-upload-label {
+  display: inline-block;
+  padding: 12px 24px;
+  background-color: #f5f5f5;
+  border: 2px dashed #d1d5db;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 14px;
+  color: #1A1A1A;
+  width: 100%;
+  text-align: center;
+  box-sizing: border-box;
+}
+
+.file-upload-label:hover {
+  background-color: #fef3f2;
+  border-color: #da5761;
+  color: #da5761;
+}
+
+.file-input:focus + .file-upload-label {
+  outline: 2px solid #da5761;
+  outline-offset: 2px;
+}
 
 .page-header {
   display: flex;

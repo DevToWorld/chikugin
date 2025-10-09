@@ -111,11 +111,13 @@ class PublicationManagementController extends Controller
 
             // PDFファイルのアップロード
             if ($request->hasFile('pdf_file')) {
-                $pdfPath = $request->file('pdf_file')->store('publications/pdfs', 'public');
+                $pdfFile = $request->file('pdf_file');
+                $pdfPath = $pdfFile->store('publications/pdfs', 'public');
                 $validated['file_url'] = Storage::disk('public')->url($pdfPath);
                 
-                // ファイルサイズを記録
-                $fileSize = $request->file('pdf_file')->getSize() / 1048576; // MB
+                // ファイル情報を記録
+                $validated['file_name'] = $pdfFile->getClientOriginalName();
+                $fileSize = $pdfFile->getSize() / 1048576; // MB
                 $validated['file_size'] = round($fileSize, 2);
             }
 
@@ -197,11 +199,13 @@ class PublicationManagementController extends Controller
                     Storage::disk('public')->delete($oldPath);
                 }
                 
-                $pdfPath = $request->file('pdf_file')->store('publications/pdfs', 'public');
+                $pdfFile = $request->file('pdf_file');
+                $pdfPath = $pdfFile->store('publications/pdfs', 'public');
                 $validated['file_url'] = Storage::disk('public')->url($pdfPath);
                 
-                // ファイルサイズを記録
-                $fileSize = $request->file('pdf_file')->getSize() / 1048576; // MB
+                // ファイル情報を記録
+                $validated['file_name'] = $pdfFile->getClientOriginalName();
+                $fileSize = $pdfFile->getSize() / 1048576; // MB
                 $validated['file_size'] = round($fileSize, 2);
             }
 
@@ -293,6 +297,7 @@ class PublicationManagementController extends Controller
             
             $publication->update([
                 'file_url' => Storage::disk('public')->url($pdfPath),
+                'file_name' => $request->file('pdf_file')->getClientOriginalName(),
                 'file_size' => round($fileSize, 2),
                 'is_downloadable' => true
             ]);

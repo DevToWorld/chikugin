@@ -21,7 +21,7 @@ class PublicationController extends Controller
 
             $query = $isAdminContext
                 ? Publication::query()->orderBy('publication_date', 'desc')
-                : Publication::where('is_published', true)->orderBy('publication_date', 'desc');
+                : Publication::published()->orderBy('publication_date', 'desc');
 
             // フィルタリング（空文字は無視）
             if ($request->filled('category')) {

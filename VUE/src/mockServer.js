@@ -375,12 +375,13 @@ const STORAGE_KEY = 'cms_mock_data'
 class MockAPIServer {
   constructor() {
     // 本番環境ではmockServerを無効化
-    this.isEnabled = process.env.NODE_ENV !== 'production'
+    // MockServer を完全に無効化してデータベースからデータを取得
+    this.isEnabled = false
     
     if (this.isEnabled) {
       this.loadData()
     } else {
-      console.log('MockServer disabled in production environment')
+      console.log('MockServer disabled - using real API and database')
       this.data = { seminars: [], publications: [], news: [], pages: {} }
     }
   }

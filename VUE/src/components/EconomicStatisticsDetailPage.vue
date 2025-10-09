@@ -62,8 +62,13 @@
              </div>
            </div>
            
-           <div class="statistics-image">
+           <div class="statistics-image" :class="{ blurred: isRestricted }">
              <img :src="statistics.image || '/img/image-1.png'" :alt="statistics.title" />
+             <MembershipBadge
+               v-if="isRestricted && membershipLevel && membershipLevel !== 'free'"
+               :level="membershipLevel"
+               class="publication-badge"
+             />
            </div>
          </div>
 
@@ -80,6 +85,11 @@
                 <img class="pdf-icon" src="/img/pdfaicon.png" alt="PDF" width="24" height="24" />
               </div>
             </div>
+          </div>
+
+          <!-- ダウンロード不可 -->
+          <div v-else-if="authState.type === 'not_downloadable'" class="not-downloadable-section">
+            <p class="not-downloadable-notice">{{ authState.message }}</p>
           </div>
 
           <!-- 非会員で会員限定 -->
@@ -130,9 +140,11 @@ import Breadcrumbs from "./Breadcrumbs.vue";
 import FixedSideButtons from "./FixedSideButtons.vue";
 import ContactSection from "./ContactSection.vue";
 import ActionButton from "./ActionButton.vue";
+import MembershipBadge from './MembershipBadge.vue';
 import { frame132131753022Data } from "../data";
 import apiClient from '../services/apiClient.js';
 import { useMemberAuth } from '../composables/useMemberAuth.js';
+import { resolveMediaUrl } from '../utils/url.js';
 
 export default {
   name: "EconomicStatisticsDetailPage",
@@ -145,7 +157,8 @@ export default {
     Breadcrumbs,
     FixedSideButtons,
     ContactSection,
-    ActionButton
+    ActionButton,
+    MembershipBadge
   },
   data() {
     return {
@@ -161,6 +174,16 @@ export default {
       const { isLoggedIn, getMembershipLabel } = useMemberAuth();
       const loggedIn = isLoggedIn();
       const membershipLabel = getMembershipLabel();
+
+      // ダウンロード不可の場合
+      if (this.statistics && !this.isDownloadable) {
+        return {
+          type: 'not_downloadable',
+          label: 'ダウンロード不可',
+          canDownload: false,
+          message: 'このレポートはダウンロードできません。'
+        };
+      }
 
       // 統計が無料公開の場合はログイン不要でDL可
       if (this.statistics && (this.statistics.members_only === false || String(this.statistics.membership_level || '').toLowerCase() === 'free')) {
@@ -188,6 +211,77 @@ export default {
         canDownload: true,
         message: 'ログイン中です。PDFをダウンロードできます。'
       };
+    },
+    // 画像をブラーするかどうかの判定
+    isRestricted() {
+      if (!this.statistics) return false;
+      
+      const { isLoggedIn } = useMemberAuth();
+      const loggedIn = isLoggedIn();
+      
+      // 無料公開の場合はブラーしない
+      const membershipLevel = (this.statistics.membership_level || '').toLowerCase();
+      if (membershipLevel === 'free' || this.statistics.members_only === false) {
+        return false;
+      }
+      
+      // 非ログインで会員限定の場合はブラー
+      if (!loggedIn && this.statistics.members_only) {
+        return true;
+      }
+      
+      // ログイン済みの場合、会員レベルをチェック
+      if (loggedIn) {
+        try {
+          const user = JSON.parse(localStorage.getItem('memberUser') || 'null');
+          const userType = (user?.membership_type || '').toLowerCase();
+          
+          // プレミアム限定コンテンツをスタンダード会員が見る場合はブラー
+          if (membershipLevel === 'premium' && userType !== 'premium') {
+            return true;
+          }
+          
+          // スタンダード限定コンテンツを非会員が見る場合はブラー（既に上でチェック済み）
+          // スタンダードまたはプレミアム会員なら制限なし
+          if (userType === 'standard' || userType === 'premium') {
+            return false;
+          }
+        } catch (e) {
+          console.error('Error checking membership level:', e);
+        }
+      }
+      
+      // デフォルトでは会員限定ならブラー
+      return !!this.statistics.members_only;
+    },
+    membershipLevel() {
+      if (!this.statistics) return null;
+      const level = this.statistics.membership_level || this.statistics.membershipLevel;
+      return level && level !== 'free' ? level : null;
+    },
+    // ダウンロード可能かどうかの判定（文字列/数値/真偽値を正規化）
+    isDownloadable() {
+      if (!this.statistics) return false;
+      const value = this.statistics.is_downloadable;
+      
+      // デバッグ用ログ
+      console.log('is_downloadable value:', value, 'type:', typeof value);
+      
+      // 真偽値の場合
+      if (typeof value === 'boolean') return value;
+      
+      // 文字列の場合
+      if (typeof value === 'string') {
+        return value === '1' || value.toLowerCase() === 'true';
+      }
+      
+      // 数値の場合
+      if (typeof value === 'number') {
+        return value === 1;
+      }
+      
+      // その他はfalse
+      return false;
     }
   },
   async mounted() {
@@ -252,31 +346,30 @@ export default {
     },
     
     async downloadStatistics() {
+      // ダウンロード可能かチェック
+      if (!this.isDownloadable) {
+        alert('このレポートはダウンロードできません。');
+        return;
+      }
+
       try {
         const response = await apiClient.downloadEconomicReport(this.statistics.id);
         if (response.success && response.data && (response.data.file_url || response.data.download_url)) {
           // ダウンロードリンクを開く
-          const url = response.data.file_url || response.data.download_url
-          window.open(url, '_blank');
+          const url = response.data.file_url || response.data.download_url;
+          if (url) {
+            // ダウンロードURLを解決（API hostを付与）
+            const downloadUrl = resolveMediaUrl(url);
+            window.open(downloadUrl, '_blank');
+          }
           try { await apiClient.logMemberAccess({ content_type: 'economic_report', content_id: this.statistics.id, access_type: 'download' }) } catch(e) { /* noop */ }
         } else {
-          // フォールバック: 直接ダウンロード
-          this.downloadFallback();
+          alert('ダウンロードファイルが見つかりません。');
         }
       } catch (error) {
         console.error('ダウンロードに失敗しました:', error);
-        this.downloadFallback();
+        alert('ダウンロードに失敗しました。');
       }
-    },
-    
-    downloadFallback() {
-      // フォールバックダウンロード処理
-      const link = document.createElement('a');
-      link.href = '/sample-statistics.pdf'; // サンプルPDFへのリンク
-      link.download = `${this.statistics.title}.pdf`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
     },
     
     goToLogin() {
@@ -379,6 +472,7 @@ export default {
   overflow: hidden;
   flex-shrink: 0;
   align-self: stretch;
+  position: relative;
 }
 
 .statistics-image img {
@@ -386,6 +480,18 @@ export default {
   height: 100%;
   object-fit: cover;
   min-height: 400px;
+}
+
+.statistics-image.blurred img {
+  filter: blur(6px);
+}
+
+/* Membership badge positioning */
+.publication-badge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 10;
 }
 
 .statistics-info {
@@ -453,6 +559,20 @@ export default {
   font-size: 1rem;
   font-weight: 500;
   margin-bottom: 20px;
+}
+
+.not-downloadable-section {
+  text-align: center;
+  padding: 20px;
+  background-color: #fff3cd;
+  border-radius: 10px;
+  border: 1px solid #ffeaa7;
+}
+
+.not-downloadable-notice {
+  color: #856404;
+  font-size: 1rem;
+  font-weight: 500;
 }
 
 .login-btn {

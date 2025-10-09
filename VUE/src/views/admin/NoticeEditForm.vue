@@ -31,7 +31,7 @@
                   お知らせ画像（サムネイル）
                 </label>
                 <div v-if="formData.featured_image" class="image-preview-container">
-                  <img :src="formData.featured_image" alt="お知らせ画像" class="image-preview" />
+                  <img :src="resolvedFeaturedImage" alt="お知らせ画像" class="image-preview" />
                   <button type="button" @click="removeImage" class="remove-image-btn">画像を削除</button>
                 </div>
                 <div class="image-upload-container">
@@ -277,6 +277,7 @@
 <script>
 import AdminLayout from './AdminLayout.vue'
 import apiClient from '../../services/apiClient'
+import { resolveMediaUrl } from '@/utils/url.js'
 
 export default {
   name: 'NoticeEditForm',
@@ -325,6 +326,11 @@ export default {
     imageUploadDirectory() {
       const base = 'public/media/notices'
       return this.selectedCategoryName ? `${base}/${this.selectedCategoryName}` : base
+    },
+    resolvedFeaturedImage() {
+      // Use resolveMediaUrl to properly prepend API host to image paths
+      if (!this.formData.featured_image) return ''
+      return resolveMediaUrl(this.formData.featured_image)
     }
   },
   async mounted() {
@@ -403,11 +409,16 @@ export default {
           this.formData = {
             title: data.title,
             content: data.content,
+            summary: data.summary || '',
             category: data.category || 'notice',
+            priority: data.priority || '',
             publish_date: (data.published_at || '').split('T')[0] || '',
+            expire_date: data.expire_date ? (data.expire_date.split('T')[0] || '') : '',
             is_pinned: !!data.is_featured,
             is_published: !!data.is_published,
-            featured_image: data.featured_image || ''
+            featured_image: data.featured_image || '',
+            link_url: data.link_url || '',
+            link_text: data.link_text || ''
           }
           // カテゴリがまだ一覧にない場合は暫定追加（表示用）
           if (this.formData.category && !this.categories.some(c => c.slug === this.formData.category)) {
@@ -435,10 +446,14 @@ export default {
           content: this.formData.content,
           summary: this.formData.summary || this.formData.content?.slice(0, 120) || '',
           category: this.formData.category || 'notice',
-          status: (this.formData.is_published || this.formData.is_pinned) ? 'published' : 'draft',
+          priority: this.formData.priority || null,
+          status: this.formData.is_published ? 'published' : 'draft',
           published_at: this.formData.publish_date || null,
+          expire_date: this.formData.expire_date || null,
           featured: !!this.formData.is_pinned,
-          featured_image: this.formData.featured_image || ''
+          featured_image: this.formData.featured_image || '',
+          link_url: this.formData.link_url || null,
+          link_text: this.formData.link_text || null
         }
         if (this.isNew) {
           const res = await apiClient.post('/api/admin/notices', payload)

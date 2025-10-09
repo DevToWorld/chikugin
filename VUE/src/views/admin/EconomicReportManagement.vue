@@ -68,7 +68,7 @@
               <th>タイトル</th>
               <th>カテゴリ</th>
               <th>年</th>
-              <th>発行日</th>
+              <th>公開日</th>
               <th>特集</th>
               <th>公開</th>
               <th>DL数</th>
@@ -212,7 +212,7 @@
 
           <div class="form-row">
             <div class="form-group half">
-              <label>発行日 <span class="required">*</span></label>
+              <label>公開日 <span class="required">*</span></label>
               <input 
                 v-model="formData.publication_date" 
                 type="date" 
@@ -279,25 +279,99 @@
             </div>
           </div>
 
-          <div class="form-row">
+          <!-- ファイルアップロード（2カラムレイアウト） -->
+          <div class="form-row file-upload-row">
+            <!-- カバー画像アップロード -->
             <div class="form-group half">
-              <label>カバー画像 <span class="required">*</span></label>
+              <label>カバー画像 <span class="required" v-if="!editingReport">*</span></label>
+              
+              <!-- 既存画像プレビュー（編集時、新規ファイル未選択時のみ） -->
+              <div v-if="editingReport && formData.cover_image && !coverImageFile" class="file-preview">
+                <div class="preview-image-container">
+                  <img :src="getImageUrl(formData.cover_image)" alt="カバー画像" class="preview-image" />
+                  <div class="preview-info">
+                    <span class="preview-label">現在の画像</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 新規画像選択時のプレビュー -->
+              <div v-if="coverImageFile" class="file-preview">
+                <div class="preview-image-container">
+                  <img :src="coverImagePreview" alt="新しい画像" class="preview-image" />
+                  <div class="preview-info">
+                    <span class="preview-label">✓ 新しい画像が選択されました</span>
+                    <span class="preview-detail">{{ coverImageFile.name }} ({{ formatFileSize(coverImageFile.size) }})</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- ファイル選択 -->
+              <div class="file-upload-wrapper">
               <input 
                 @change="handleCoverImageChange" 
                 type="file" 
                 accept="image/*"
                 class="form-file"
+                  id="cover-image-input"
               >
+                <label for="cover-image-input" class="file-upload-btn">
+                  {{ coverImageFile ? '別の画像を選択' : (editingReport ? '画像を変更' : '画像を選択') }}
+                </label>
+              </div>
+              <p class="form-help">推奨: 2MB以下の画像ファイル（JPEG, PNG, GIF）</p>
             </div>
             
+            <!-- レポートファイルアップロード -->
             <div class="form-group half">
-              <label>レポートファイル <span class="required">*</span></label>
+              <label>レポートファイル (PDF) <span class="required" v-if="!editingReport">*</span></label>
+              
+              <!-- 既存ファイル情報（編集時、新規ファイル未選択時のみ） -->
+              <div v-if="editingReport && formData.file_url && !reportFile" class="file-info-card">
+                <div class="file-icon">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M14 2v6h6M16 13H8M16 17H8M10 9H8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </div>
+                <div class="file-details">
+                  <div class="file-name">{{ formData.file_name || getFileName(formData.file_url) }}</div>
+                  <div class="file-meta">
+                    <span v-if="formData.formatted_file_size">{{ formData.formatted_file_size }}</span>
+                    <span v-else-if="formData.file_size">{{ formData.file_size }} MB</span>
+                    <span v-if="formData.pages"> • {{ formData.pages }}ページ</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 新規ファイル選択時の情報 -->
+              <div v-if="reportFile" class="file-info-card new-file">
+                <div class="file-icon">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M14 2v6h6M16 13H8M16 17H8M10 9H8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </div>
+                <div class="file-details">
+                  <div class="file-name">✓ {{ reportFile.name }}</div>
+                  <div class="file-meta">{{ formatFileSize(reportFile.size) }}</div>
+                </div>
+              </div>
+
+              <!-- ファイル選択 -->
+              <div class="file-upload-wrapper">
               <input 
                 @change="handleFileChange" 
                 type="file" 
                 accept=".pdf,.doc,.docx"
                 class="form-file"
+                  id="report-file-input"
               >
+                <label for="report-file-input" class="file-upload-btn">
+                  {{ reportFile ? '別のファイルを選択' : (editingReport ? 'ファイルを変更' : 'ファイルを選択') }}
+                </label>
+              </div>
+              <p class="form-help">推奨: 10MB以下のPDFファイル</p>
             </div>
           </div>
 
@@ -406,6 +480,7 @@ export default {
         is_published: false
       },
       coverImageFile: null,
+      coverImagePreview: null,
       reportFile: null
     }
   },
@@ -486,6 +561,21 @@ export default {
       this.editingReport = report
       this.formData = { ...report }
       this.formData.publication_date = this.formatDateForInput(report.publication_date)
+      
+      // Reset file selection when editing
+      this.coverImageFile = null
+      this.coverImagePreview = null
+      this.reportFile = null
+      
+      // Clean up any existing preview URL
+      if (this.coverImagePreview) {
+        try {
+          URL.revokeObjectURL(this.coverImagePreview)
+        } catch (e) {
+          // Ignore errors
+        }
+      }
+      
       this.showModal = true
     },
 
@@ -494,7 +584,17 @@ export default {
       this.editingReport = null
       this.resetFormData()
       this.coverImageFile = null
+      this.coverImagePreview = null
       this.reportFile = null
+      
+      // Clean up preview URL to avoid memory leaks
+      if (this.coverImagePreview) {
+        try {
+          URL.revokeObjectURL(this.coverImagePreview)
+        } catch (e) {
+          // Ignore errors
+        }
+      }
     },
 
     resetFormData() {
@@ -555,20 +655,47 @@ export default {
           payload.membership_level = 'free'
         }
 
+        // Exclude file fields from payload to avoid sending string data
+        const fileFields = ['cover_image', 'file', 'file_url', 'file_name', 'file_size', 'file_size_bytes', 'formatted_file_size']
+
         Object.keys(payload).forEach(key => {
           const val = payload[key]
           if (val !== null && val !== undefined) {
+            // Skip empty strings for optional fields
+            if (typeof val === 'string' && val.trim() === '' && ['description', 'keywords', 'author', 'publisher'].includes(key)) {
+              return
+            }
+            // Skip file-related fields - they will be handled separately if they are File objects
+            if (fileFields.includes(key)) {
+              console.log('Skipping file field:', key, val)
+              return
+            }
             formData.append(key, typeof val === 'boolean' ? (val ? '1' : '0') : val)
           }
         })
         
-        // ファイルを追加
-        if (this.coverImageFile) {
+        // ファイルを追加（新規アップロードがある場合のみ）
+        // 注意: 編集時に新しいファイルをアップロードしない場合は、cover_image フィールドを送信しない
+        if (this.coverImageFile && this.coverImageFile instanceof File && this.coverImageFile.size > 0) {
           formData.append('cover_image', this.coverImageFile)
+          console.log('Adding cover image:', this.coverImageFile.name, this.coverImageFile.size, 'bytes')
+        } else {
+          console.log('No valid cover image file selected - not sending cover_image field')
+          // Ensure we don't send any cover_image data at all
         }
-        if (this.reportFile) {
+        
+        if (this.reportFile && this.reportFile instanceof File && this.reportFile.size > 0) {
           formData.append('file', this.reportFile)
+          console.log('Adding report file:', this.reportFile.name, this.reportFile.size, 'bytes')
+          console.log('File type:', this.reportFile.type)
+          console.log('File last modified:', new Date(this.reportFile.lastModified))
+        } else {
+          console.log('No valid report file selected - not sending file field')
+          console.log('Report file object:', this.reportFile)
+          // Ensure we don't send any file data at all
         }
+        
+        // membership_level は必ず追加
         if (this.formData.membership_level) {
           formData.append('membership_level', this.formData.membership_level)
         }
@@ -591,6 +718,18 @@ export default {
         }
         if (authToken) headers['Authorization'] = authToken.startsWith('Bearer ') ? authToken : `Bearer ${authToken}`
 
+        // Debug: Log form data contents
+        console.log('FormData contents:')
+        console.log('Editing report:', !!this.editingReport)
+        console.log('Cover image file:', this.coverImageFile)
+        console.log('Report file:', this.reportFile)
+        console.log('Form data cover_image:', this.formData.cover_image)
+        console.log('Form data file_url:', this.formData.file_url)
+        
+        for (let pair of formData.entries()) {
+          console.log(pair[0] + ': ' + (pair[1] instanceof File ? pair[1].name + ' (' + pair[1].size + ' bytes)' : pair[1]))
+        }
+
         const response = await fetch(url, {
           method,
           headers,
@@ -598,6 +737,16 @@ export default {
         })
         
         const data = await response.json()
+        console.log('Response status:', response.status)
+        console.log('Response:', data)
+        
+        // Additional debugging for file upload issues
+        if (!data.success && data.errors) {
+          console.log('Validation errors:', data.errors)
+          if (data.errors.file) {
+            console.log('File validation errors:', data.errors.file)
+          }
+        }
         
         if (data.success) {
           this.closeModal()
@@ -607,9 +756,18 @@ export default {
         } else {
           // バリデーション詳細を表示
           if (data.errors) {
-            const first = Object.entries(data.errors)[0]
-            const msg = first ? `${first[0]}: ${first[1]}` : ''
-            this.error = data.message ? `${data.message} - ${msg}` : msg || '保存に失敗しました'
+            const errorMessages = Object.entries(data.errors).map(([field, messages]) => {
+              const fieldName = field === 'cover_image' ? 'カバー画像' :
+                               field === 'file' ? 'レポートファイル' :
+                               field === 'title' ? 'タイトル' :
+                               field === 'description' ? '説明' :
+                               field === 'category' ? 'カテゴリ' :
+                               field === 'year' ? '年' :
+                               field === 'publication_date' ? '公開日' : field
+              const msgs = Array.isArray(messages) ? messages : [messages]
+              return `${fieldName}: ${msgs.join(', ')}`
+            }).join('\n')
+            this.error = data.message ? `${data.message}\n\n${errorMessages}` : errorMessages
             alert(this.error)
           } else {
             this.error = data.message || '保存に失敗しました'
@@ -702,11 +860,121 @@ export default {
     },
 
     handleCoverImageChange(event) {
-      this.coverImageFile = event.target.files[0]
+      const file = event.target.files[0]
+      
+      if (file) {
+        // Validate file type
+        const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/gif']
+        if (!allowedTypes.includes(file.type)) {
+          alert('画像ファイルは JPEG, PNG, JPG, GIF 形式のみサポートしています。')
+          event.target.value = ''
+          this.coverImageFile = null
+          this.coverImagePreview = null
+          return
+        }
+        
+        // Validate file size (2MB limit)
+        if (file.size > 2 * 1024 * 1024) {
+          alert('画像ファイルは2MB以下にしてください。')
+          event.target.value = ''
+          this.coverImageFile = null
+          this.coverImagePreview = null
+          return
+        }
+      }
+      
+      this.coverImageFile = file
+      
+      // Create preview URL
+      if (file) {
+        try {
+          this.coverImagePreview = URL.createObjectURL(file)
+        } catch (e) {
+          console.error('Failed to create image preview:', e)
+          this.coverImagePreview = null
+        }
+      } else {
+        this.coverImagePreview = null
+      }
     },
 
     handleFileChange(event) {
-      this.reportFile = event.target.files[0]
+      const file = event.target.files[0]
+      
+      if (file) {
+        // Validate file type
+        const allowedTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document']
+        const allowedExtensions = ['.pdf', '.doc', '.docx']
+        const fileExtension = '.' + file.name.split('.').pop().toLowerCase()
+        
+        if (!allowedTypes.includes(file.type) && !allowedExtensions.includes(fileExtension)) {
+          alert('ファイルは PDF, DOC, DOCX 形式のみサポートしています。')
+          event.target.value = ''
+          this.reportFile = null
+          return
+        }
+        
+        // Validate file size (10MB limit to match backend)
+        if (file.size > 10 * 1024 * 1024) {
+          alert('ファイルは10MB以下にしてください。')
+          event.target.value = ''
+          this.reportFile = null
+          return
+        }
+      }
+      
+      this.reportFile = file
+    },
+
+    getImageUrl(imagePath) {
+      if (!imagePath) return ''
+      
+      // If it's already a full URL
+      if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
+        return imagePath
+      }
+      
+      // If it starts with a slash, it's relative to the domain
+      if (imagePath.startsWith('/')) {
+        return imagePath
+      }
+      
+      // Otherwise, it's a storage path
+      const apiUrl = getApiUrl('')
+      const baseUrl = apiUrl.replace('/api', '')
+      
+      // Remove 'storage/' prefix if present
+      let path = imagePath
+      if (path.startsWith('storage/')) {
+        path = path.substring(8)
+      }
+      
+      return `${baseUrl}/storage/${path}`
+    },
+
+    getFileName(filePath) {
+      if (!filePath) return 'ファイル名不明'
+      
+      // Extract filename from path
+      const parts = filePath.split('/')
+      const filename = parts[parts.length - 1]
+      
+      // If it's a hashed filename (very long), show a generic name
+      if (filename.length > 40) {
+        return 'レポートPDFファイル'
+      }
+      
+      return filename
+    },
+
+    formatFileSize(bytes) {
+      if (!bytes || bytes === 0) return '0 B'
+      
+      const k = 1024
+      const sizes = ['B', 'KB', 'MB', 'GB']
+      const i = Math.floor(Math.log(bytes) / Math.log(k))
+      
+      return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i]
     },
 
     getCategoryName(category) {
@@ -727,6 +995,17 @@ export default {
     formatDateForInput(dateString) {
       if (!dateString) return ''
       return new Date(dateString).toISOString().split('T')[0]
+    }
+  },
+  
+  beforeUnmount() {
+    // Clean up preview URL when component is destroyed
+    if (this.coverImagePreview) {
+      try {
+        URL.revokeObjectURL(this.coverImagePreview)
+      } catch (e) {
+        // Ignore errors
+      }
     }
   }
 }
@@ -1141,7 +1420,142 @@ export default {
 }
 
 .form-file {
-  padding: 8px 0;
+  display: none;
+}
+
+.file-upload-wrapper {
+  margin-top: 12px;
+}
+
+.file-upload-btn {
+  display: inline-block;
+  padding: 10px 20px;
+  background: #f8f9fa;
+  border: 2px dashed #d1d5db;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 14px;
+  color: #1a1a1a;
+  font-weight: 500;
+  text-align: center;
+}
+
+.file-upload-btn:hover {
+  background: #fef3f2;
+  border-color: #da5761;
+  color: #da5761;
+}
+
+/* File Upload Row Styles */
+.file-upload-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+/* Image Preview Styles */
+.file-preview {
+  margin-bottom: 12px;
+  padding: 12px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e1e5e9;
+}
+
+.preview-image-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: center;
+}
+
+.preview-image {
+  width: 100%;
+  max-width: 200px;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 6px;
+  border: 1px solid #e1e5e9;
+}
+
+.preview-info {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+}
+
+.preview-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #1a1a1a;
+}
+
+.preview-detail {
+  font-size: 12px;
+  color: #6c757d;
+  word-break: break-word;
+}
+
+/* File Info Card Styles */
+.file-info-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e1e5e9;
+  margin-bottom: 12px;
+  text-align: center;
+}
+
+.file-info-card.new-file {
+  background: #ecfdf5;
+  border-color: #6ee7b7;
+}
+
+.file-icon {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: white;
+  border-radius: 8px;
+  color: #da5761;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.file-details {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.file-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: #1a1a1a;
+  word-break: break-word;
+  line-height: 1.4;
+}
+
+.file-meta {
+  font-size: 12px;
+  color: #6c757d;
+  line-height: 1.3;
+}
+
+.form-help {
+  font-size: 12px;
+  color: #6c757d;
+  margin-top: 8px;
 }
 
 .checkbox-group {
@@ -1227,6 +1641,26 @@ export default {
   .checkbox-group {
     flex-direction: column;
     gap: 12px;
+  }
+  
+  /* File upload responsive styles */
+  .file-upload-row {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  
+  .preview-image {
+    max-width: 150px;
+    height: 100px;
+  }
+  
+  .file-info-card {
+    padding: 12px;
+  }
+  
+  .file-icon {
+    width: 40px;
+    height: 40px;
   }
 }
 </style>

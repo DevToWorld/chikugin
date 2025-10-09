@@ -62,8 +62,13 @@
              </div>
            </div>
            
-           <div class="statistics-image">
+           <div class="statistics-image" :class="{ blurred: isMembersOnly }">
              <img :src="statistics.image || '/img/image-1.png'" :alt="statistics.title" />
+             <MembershipBadge
+               v-if="isMembersOnly && membershipLevel && membershipLevel !== 'free'"
+               :level="membershipLevel"
+               class="publication-badge"
+             />
            </div>
          </div>
 
@@ -116,6 +121,7 @@ import FixedSideButtons from "./FixedSideButtons.vue";
 import ContactSection from "./ContactSection.vue";
 import Frame13213176122 from "./Frame13213176122.vue";
 import ActionButton from "./ActionButton.vue";
+import MembershipBadge from './MembershipBadge.vue';
 import { frame132131753022Data } from "../data";
 import apiClient from '../services/apiClient.js';
 
@@ -131,7 +137,8 @@ export default {
     FixedSideButtons,
     ContactSection,
     Frame13213176122,
-    ActionButton
+    ActionButton,
+    MembershipBadge
   },
   data() {
     return {
@@ -140,6 +147,23 @@ export default {
       loading: true,
       error: null
     };
+  },
+  computed: {
+    isMembersOnly() {
+      if (!this.statistics) return false;
+      // Check if the item is members-only
+      const membersOnly = this.statistics.members_only || this.statistics.membersOnly;
+      const membershipLevel = this.statistics.membership_level || this.statistics.membershipLevel;
+      // If explicitly set to free, don't blur
+      if (membershipLevel === 'free' || membersOnly === false) return false;
+      // If members_only or has a membership_level requirement, blur it
+      return !!membersOnly || !!membershipLevel;
+    },
+    membershipLevel() {
+      if (!this.statistics) return null;
+      const level = this.statistics.membership_level || this.statistics.membershipLevel;
+      return level && level !== 'free' ? level : null;
+    }
   },
   async mounted() {
     await this.loadStatistics();
@@ -294,6 +318,7 @@ export default {
   overflow: hidden;
   flex-shrink: 0;
   align-self: stretch;
+  position: relative;
 }
 
 .statistics-image img {
@@ -301,6 +326,18 @@ export default {
   height: 100%;
   object-fit: cover;
   min-height: 400px;
+}
+
+.statistics-image.blurred img {
+  filter: blur(6px);
+}
+
+/* Membership badge positioning */
+.publication-badge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 10;
 }
 
 .statistics-info {

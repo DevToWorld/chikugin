@@ -30,7 +30,7 @@
         <div class="dropdown-sub-item" @click="navigateTo('economic-indicators')">
           <CmsText pageKey="navigation" fieldKey="nav_indicators" tag="span" :fallback="'経済指標'" />
         </div>
-        <div class="dropdown-sub-item" @click="navigateTo('economic-statistics')">
+        <div class="dropdown-sub-item" @click="navigateTo('economic-research')">
           <CmsText pageKey="navigation" fieldKey="nav_statistics" tag="span" :fallback="'経済・調査統計'" />
         </div>
       </div>

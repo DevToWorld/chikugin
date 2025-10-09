@@ -22,6 +22,7 @@ class EconomicReport extends Model
         'keywords',
         'cover_image',
         'file_url',
+        'file_name',
         'file_size',
         'file_size_bytes',
         'pages',
@@ -56,10 +57,13 @@ class EconomicReport extends Model
 
     /**
      * 公開されているレポートのスコープ
+     * - is_published が true
+     * - publication_date が現在日時以前
      */
     public function scopePublished($query)
     {
-        return $query->where('is_published', true);
+        return $query->where('is_published', true)
+                     ->where('publication_date', '<=', now());
     }
 
     /**

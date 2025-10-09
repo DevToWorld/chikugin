@@ -62,7 +62,7 @@ export default {
         'プレミアム会員': '/membership/premium',
         '各種情報': '/economic-indicators',
         '経済指標一覧': '/economic-indicators',
-        '経済・調査統計': '/economic-statistics',
+        '経済・調査統計': '/economic-research',
         'サイトマップ': '/sitemap',
         'プライバシーポリシー': '/privacy',
         '利用規約': '/terms',

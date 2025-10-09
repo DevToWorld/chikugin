@@ -84,7 +84,7 @@ class EconomicReportsController extends Controller
             $featured = EconomicReport::published()
                 ->featured()
                 ->orderBy('publication_date', 'desc')
-                ->first();
+                ->get();
 
             return response()->json([
                 'success' => true,
