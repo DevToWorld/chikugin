@@ -433,6 +433,7 @@ import AdminLayout from './AdminLayout.vue'
 import { getApiUrl } from '@/config/api'
 import { useAdminAuth } from '../../composables/useAdminAuth'
 import apiClient from '../../services/apiClient'
+import { resolveMediaUrl } from '@/utils/url.js'
 
 export default {
   name: 'EconomicReportManagement',
@@ -927,29 +928,8 @@ export default {
     },
 
     getImageUrl(imagePath) {
-      if (!imagePath) return ''
-      
-      // If it's already a full URL
-      if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
-        return imagePath
-      }
-      
-      // If it starts with a slash, it's relative to the domain
-      if (imagePath.startsWith('/')) {
-        return imagePath
-      }
-      
-      // Otherwise, it's a storage path
-      const apiUrl = getApiUrl('')
-      const baseUrl = apiUrl.replace('/api', '')
-      
-      // Remove 'storage/' prefix if present
-      let path = imagePath
-      if (path.startsWith('storage/')) {
-        path = path.substring(8)
-      }
-      
-      return `${baseUrl}/storage/${path}`
+      // Use the centralized URL resolver to avoid issues with API host
+      return resolveMediaUrl(imagePath)
     },
 
     getFileName(filePath) {
